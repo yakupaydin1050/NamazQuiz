@@ -48,3 +48,20 @@ Join our community of developers creating universal apps.
 
 - [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
 - [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+
+# Namaz Quiz Projesi - Yol Haritası
+
+## Tamamlananlar:
+- Expo projesi kuruldu (NamazQuiz).
+- Telefon (Expo Go) bağlantısı sağlandı.
+- `app/index.tsx` ana sayfası oluşturuldu.
+- İlk buton ve alert testi yapıldı.
+
+## Kaldığımız Yer:
+- 550 soruyu içeren Excel/Word dosyasının incelenmesi.
+- Soruların JSON formatına çevrilmesi.
+- Kategori (Kolay-Orta-Zor) seçim ekranının yapılması.
+
+## Önemli Komutlar:
+- Projeyi başlatmak için: `npx expo start`
+- Önbelleği temizleyip başlatmak için: `npx expo start --clear`
