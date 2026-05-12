@@ -126,6 +126,14 @@ export default function ProfileSettings() {
   };
 
   const showPhotoOptions = () => {
+    if (isAnonymous) {
+      Alert.alert(
+        "Üyelere Özel",
+        "Profil fotoğrafı yüklemek için hesap oluşturman gerekiyor. Kayıt ekranından ücretsiz hesap açabilirsin.",
+        [{ text: "Tamam", style: "cancel" }]
+      );
+      return;
+    }
     Alert.alert("Profil Fotoğrafı", "Nasıl eklemek istersin?", [
       { text: "Kamera", onPress: () => handlePhotoUpdate("camera") },
       { text: "Galeriden Seç", onPress: () => handlePhotoUpdate("library") },

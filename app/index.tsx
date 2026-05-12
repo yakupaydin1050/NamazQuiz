@@ -92,7 +92,7 @@ export default function KarşılamaEkranı() {
               </PolicySection>
 
               <Text style={{ ...theme.type.micro, color: theme.colors.muted, marginTop: theme.space.lg, marginBottom: theme.space.sm }}>
-                Son güncelleme: Mayıs 2025
+                Son güncelleme: Mayıs 2026
               </Text>
             </ScrollView>
           </View>
