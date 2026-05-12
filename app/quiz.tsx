@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -19,6 +19,7 @@ import {
 // FIREBASE BAĞLANTILARI
 import { addDoc, collection, doc, getDocs, query, runTransaction, serverTimestamp, where } from 'firebase/firestore';
 import { auth, db } from '../config/firebase';
+import QuestionText from '../components/ui/QuestionText';
 
 function shuffleArray(array: any[]) {
   const shuffled = [...array];
@@ -46,6 +47,10 @@ export default function YarışmaEkranı() {
   const [isFeedbackVisible, setFeedbackVisible] = useState(false);
   const [feedbackComment, setFeedbackComment] = useState("");
   const [sendingFeedback, setSendingFeedback] = useState(false);
+  const [bonusLabel, setBonusLabel] = useState("");
+  const [revealedAnswers, setRevealedAnswers] = useState<Set<number>>(new Set());
+  const [skippedQuestions, setSkippedQuestions] = useState<Set<number>>(new Set());
+  const questionStartTime = useRef(Date.now());
 
   // Firestore'dan soruları çek
   useEffect(() => {
@@ -64,6 +69,12 @@ export default function YarışmaEkranı() {
     };
     fetchQuestions();
   }, [level]);
+
+  // Yeni soru gösterilince süreyi sıfırla
+  useEffect(() => {
+    questionStartTime.current = Date.now();
+    setBonusLabel("");
+  }, [currentIndex]);
 
   // Sayaç Mantığı
   useEffect(() => {
@@ -138,28 +149,58 @@ export default function YarışmaEkranı() {
   const currentQuestion = questions[currentIndex];
   const selectedAnswer = userAnswers[currentIndex];
 
-  // GÜNCELLENEN PUANLAMA MANTIĞI
+  const getTimeBonus = (elapsed: number): number => {
+    if (level === 'easy') {
+      if (elapsed <= 5) return 5;
+      if (elapsed <= 10) return 3;
+      if (elapsed <= 15) return 1;
+    } else if (level === 'medium') {
+      if (elapsed <= 8) return 5;
+      if (elapsed <= 15) return 3;
+      if (elapsed <= 22) return 1;
+    } else {
+      if (elapsed <= 12) return 5;
+      if (elapsed <= 20) return 3;
+      if (elapsed <= 30) return 1;
+    }
+    return 0;
+  };
+
+  const handleReveal = () => {
+    if (selectedAnswer || isFinished) return;
+    setRevealedAnswers(prev => new Set([...prev, currentIndex]));
+    setUserAnswers(prev => ({ ...prev, [currentIndex]: currentQuestion.correct }));
+  };
+
+  const handleSkip = () => {
+    if (selectedAnswer || isFinished) return;
+    setSkippedQuestions(prev => new Set([...prev, currentIndex]));
+    if (currentIndex === questions.length - 1) {
+      handleFinishQuiz();
+    } else {
+      setCurrentIndex(prev => prev + 1);
+    }
+  };
+
   const handleAnswer = (option: string) => {
     if (selectedAnswer || isFinished) return;
 
     setUserAnswers({ ...userAnswers, [currentIndex]: option });
 
-    // Seviyeye göre puan belirleme
-    let gain = 10; // Varsayılan: easy
+    let gain = 10;
     let loss = 5;
-
-    if (level === 'medium') {
-      gain = 20;
-      loss = 10;
-    } else if (level === 'hard') {
-      gain = 30;
-      loss = 15;
-    }
+    if (level === 'medium') { gain = 20; loss = 10; }
+    else if (level === 'hard') { gain = 30; loss = 15; }
 
     if (option === currentQuestion.correct) {
-      setScore(prev => prev + gain);
+      const elapsed = (Date.now() - questionStartTime.current) / 1000;
+      const bonus = getTimeBonus(elapsed);
+      setScore(prev => prev + gain + bonus);
+      if (bonus > 0) {
+        setBonusLabel(`+${bonus} ⚡`);
+        setTimeout(() => setBonusLabel(""), 1500);
+      }
     } else {
-      // Puanın negatif değerlere düşmemesi için Math.max kullanıyoruz
       setScore(prev => Math.max(0, prev - loss));
     }
   };
@@ -172,8 +213,12 @@ export default function YarışmaEkranı() {
 
   // SONUÇ EKRANI
   if (isFinished) {
-    const correctCount = Object.keys(userAnswers).filter(idx => userAnswers[parseInt(idx)] === questions[parseInt(idx)].correct).length;
-    const wrongCount = Object.keys(userAnswers).length - correctCount;
+    const correctCount = Object.keys(userAnswers).filter(idx => {
+      const i = parseInt(idx);
+      return userAnswers[i] === questions[i].correct && !revealedAnswers.has(i);
+    }).length;
+    const skippedCount = skippedQuestions.size;
+    const wrongCount = Object.keys(userAnswers).length - correctCount - revealedAnswers.size;
 
     return (
       <SafeAreaView style={styles.resultContainer}>
@@ -192,8 +237,8 @@ export default function YarışmaEkranı() {
             <Text style={[styles.statValue, { color: '#1e40af' }]}>{formatTime(seconds)}</Text>
           </View>
           <View style={styles.statCard}>
-            <Text style={styles.statLabel}>DOĞRU / YANLIŞ</Text>
-            <Text style={styles.statValue}>✅{correctCount} / ❌{wrongCount}</Text>
+            <Text style={styles.statLabel}>DOĞRU / YANLIŞ / ATLA</Text>
+            <Text style={styles.statValue}>✅{correctCount} / ❌{wrongCount} / ⏭{skippedCount}</Text>
           </View>
           <View style={styles.statCard}>
             <Text style={styles.statLabel}>ZORLUK</Text>
@@ -228,7 +273,12 @@ export default function YarışmaEkranı() {
       <View style={styles.header}>
         <View style={styles.headerItem}>
           <Text style={styles.headerLabel}>PUAN</Text>
-          <Text style={styles.headerValue}>{score}</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+            <Text style={styles.headerValue}>{score}</Text>
+            {bonusLabel ? (
+              <Text style={{ fontSize: 11, fontWeight: 'bold', color: '#f59e0b' }}>{bonusLabel}</Text>
+            ) : null}
+          </View>
         </View>
         <View style={styles.headerItem}>
           <Text style={styles.headerLabel}>SÜRE</Text>
@@ -245,7 +295,7 @@ export default function YarışmaEkranı() {
         keyboardShouldPersistTaps="handled"
       >
         <View style={styles.questionCard}>
-          <Text style={styles.questionText}>{currentQuestion.question}</Text>
+          <QuestionText text={currentQuestion.question} style={styles.questionText} />
           <TouchableOpacity
             style={styles.reportIcon}
             onPress={() => setFeedbackVisible(true)}
@@ -255,7 +305,7 @@ export default function YarışmaEkranı() {
         </View>
 
         <View style={styles.optionsContainer}>
-          {currentQuestion.options.map((option, index) => {
+          {currentQuestion.options.map((option: string, index: number) => {
             let backgroundColor = 'white', borderColor = '#e2e8f0';
             if (selectedAnswer) {
               if (option === currentQuestion.correct) { backgroundColor = '#dcfce7'; borderColor = '#22c55e'; }
@@ -276,6 +326,18 @@ export default function YarışmaEkranı() {
             );
           })}
         </View>
+
+        {!selectedAnswer && (
+          <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 28, marginTop: 6, marginBottom: 8 }}>
+            <TouchableOpacity onPress={handleReveal} hitSlop={10}>
+              <Text style={styles.subtleAction}>Yanıtı Göster</Text>
+            </TouchableOpacity>
+            <Text style={{ color: '#cbd5e1', fontSize: 13 }}>|</Text>
+            <TouchableOpacity onPress={handleSkip} hitSlop={10}>
+              <Text style={styles.subtleAction}>Soruyu Atla</Text>
+            </TouchableOpacity>
+          </View>
+        )}
       </ScrollView>
 
       <View style={styles.bottomBar}>
@@ -306,11 +368,11 @@ export default function YarışmaEkranı() {
         <TouchableOpacity
           style={[
             styles.pillButton,
-            (!selectedAnswer || isSaving) && styles.pillDisabled,
-            currentIndex === questions.length - 1 && selectedAnswer ? styles.pillPrimary : null,
+            ((!selectedAnswer && !skippedQuestions.has(currentIndex)) || isSaving) && styles.pillDisabled,
+            currentIndex === questions.length - 1 && (selectedAnswer || skippedQuestions.has(currentIndex)) ? styles.pillPrimary : null,
           ]}
           activeOpacity={0.85}
-          disabled={!selectedAnswer || isSaving}
+          disabled={(!selectedAnswer && !skippedQuestions.has(currentIndex)) || isSaving}
           onPress={() => {
             if (currentIndex === questions.length - 1) {
               handleFinishQuiz();
@@ -319,13 +381,13 @@ export default function YarışmaEkranı() {
             }
           }}
         >
-          <Text style={[styles.pillText, (!selectedAnswer || isSaving) && styles.pillTextDisabled]}>
+          <Text style={[styles.pillText, ((!selectedAnswer && !skippedQuestions.has(currentIndex)) || isSaving) && styles.pillTextDisabled]}>
             {currentIndex === questions.length - 1 ? "Sonuçlar" : "Sonraki"}
           </Text>
           <Ionicons
             name="chevron-forward"
             size={18}
-            color={!selectedAnswer || isSaving ? "#cbd5e1" : "#1e293b"}
+            color={(!selectedAnswer && !skippedQuestions.has(currentIndex)) || isSaving ? "#cbd5e1" : "#1e293b"}
           />
         </TouchableOpacity>
       </View>
@@ -451,5 +513,6 @@ const styles = StyleSheet.create({
   modalTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 15 },
   feedbackInput: { backgroundColor: '#f1f5f9', borderRadius: 15, padding: 15, height: 100, textAlignVertical: 'top', marginBottom: 20 },
   modalButtons: { flexDirection: 'row', justifyContent: 'flex-end', gap: 10 },
-  modalButton: { padding: 12, paddingHorizontal: 20, borderRadius: 10 }
+  modalButton: { padding: 12, paddingHorizontal: 20, borderRadius: 10 },
+  subtleAction: { fontSize: 13, color: '#94a3b8', fontWeight: '500' },
 });

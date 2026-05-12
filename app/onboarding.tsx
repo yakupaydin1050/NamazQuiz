@@ -5,6 +5,7 @@ import React, { useRef, useState } from 'react';
 import { Dimensions, FlatList, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { theme } from '../components/ui/theme';
+import { RANKS } from '../utils/rank';
 
 const { width } = Dimensions.get('window');
 
@@ -14,7 +15,7 @@ type Slide = {
   color: string;
   title: string;
   description: string;
-  extra?: 'scoring';
+  extra?: 'scoring' | 'ranks';
 };
 
 const slides: Slide[] = [
@@ -37,8 +38,16 @@ const slides: Slide[] = [
     icon: 'trophy-outline',
     color: theme.colors.warning,
     title: 'Puan Kazan,\nZirveye Çık',
-    description: 'Zorluk arttıkça ödül de artar. En yüksek puanlar liderlik tablosunda sıralanır.',
+    description: 'Zorluk arttıkça ödül artar. Hızlı cevapla bonus kazan! En yüksek puanlar liderlik tablosunda.',
     extra: 'scoring',
+  },
+  {
+    key: '4',
+    icon: 'ribbon-outline',
+    color: theme.colors.danger,
+    title: 'Rütbe Kazan,\nEfsane Ol',
+    description: 'Puan kazandıkça rütben yükselir. En tepede seni ne bekliyor?',
+    extra: 'ranks',
   },
 ];
 
@@ -46,6 +55,12 @@ const scoringRows = [
   { label: 'Kolay', gain: '+10', loss: '-5', color: theme.colors.primary },
   { label: 'Orta', gain: '+20', loss: '-10', color: theme.colors.warning },
   { label: 'Zor', gain: '+30', loss: '-15', color: theme.colors.danger },
+];
+
+const bonusRows = [
+  { label: 'Kolay   0–5 / 5–10 / 10–15 sn', bonus: '+5 / +3 / +1 ⚡' },
+  { label: 'Orta    0–8 / 8–15 / 15–22 sn', bonus: '+5 / +3 / +1 ⚡' },
+  { label: 'Zor    0–12 / 12–20 / 20–30 sn', bonus: '+5 / +3 / +1 ⚡' },
 ];
 
 export default function Onboarding() {
@@ -87,8 +102,28 @@ export default function Onboarding() {
         {item.description}
       </Text>
 
+      {item.extra === 'ranks' && (
+        <View style={{ marginTop: theme.space.lg, width: '100%', gap: theme.space.sm }}>
+          {RANKS.map(rank => (
+            <View key={rank.title} style={{
+              flexDirection: 'row', alignItems: 'center',
+              backgroundColor: theme.colors.surface,
+              borderRadius: theme.radius.md,
+              borderWidth: 1, borderColor: theme.colors.border,
+              paddingHorizontal: theme.space.lg, paddingVertical: theme.space.sm,
+            }}>
+              <Text style={{ fontSize: 18, width: 32 }}>{rank.emoji}</Text>
+              <Text style={{ ...theme.type.small, color: theme.colors.text, flex: 1 }}>{rank.title}</Text>
+              <Text style={{ ...theme.type.micro, color: theme.colors.muted }}>
+                {rank.maxScore ? `${rank.minScore} – ${rank.maxScore}` : `${rank.minScore}+`}
+              </Text>
+            </View>
+          ))}
+        </View>
+      )}
+
       {item.extra === 'scoring' && (
-        <View style={{ marginTop: theme.space.xl, width: '100%', gap: theme.space.sm }}>
+        <View style={{ marginTop: theme.space.lg, width: '100%', gap: theme.space.sm }}>
           {scoringRows.map(row => (
             <View key={row.label} style={{
               flexDirection: 'row', alignItems: 'center',
@@ -105,6 +140,22 @@ export default function Onboarding() {
               <Text style={{ ...theme.type.small, color: theme.colors.danger }}>
                 Yanlış {row.loss}
               </Text>
+            </View>
+          ))}
+
+          <Text style={{ ...theme.type.micro, color: theme.colors.muted, letterSpacing: 1, marginTop: theme.space.xs }}>
+            HIZ BONUSU
+          </Text>
+          {bonusRows.map(row => (
+            <View key={row.label} style={{
+              flexDirection: 'row', alignItems: 'center',
+              backgroundColor: theme.colors.surface,
+              borderRadius: theme.radius.md,
+              borderWidth: 1, borderColor: theme.colors.border,
+              paddingHorizontal: theme.space.lg, paddingVertical: theme.space.sm,
+            }}>
+              <Text style={{ ...theme.type.small, color: theme.colors.muted, flex: 1 }}>{row.label}</Text>
+              <Text style={{ ...theme.type.small, color: '#f59e0b', fontWeight: '700' }}>{row.bonus}</Text>
             </View>
           ))}
         </View>

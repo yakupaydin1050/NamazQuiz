@@ -8,6 +8,12 @@ import { Card } from '../components/ui/Card';
 import { Screen } from '../components/ui/Screen';
 import { theme } from '../components/ui/theme';
 import { auth, db } from '../config/firebase';
+import { getRankProgress } from '../utils/rank';
+import hadiths from '../data/hadiths.json';
+
+const today = new Date();
+const dayIndex = Math.floor(today.getTime() / 86_400_000);
+const dailyHadith = hadiths[dayIndex % hadiths.length];
 
 export default function Dashboard() {
   const router = useRouter();
@@ -64,7 +70,7 @@ export default function Dashboard() {
       <Stack.Screen options={{ headerShown: false }} />
       <ScrollView contentContainerStyle={{ padding: theme.space.xl }} keyboardShouldPersistTaps="handled">
         
-        <View style={{ marginBottom: theme.space.xl }}>
+        <View style={{ marginBottom: theme.space.lg }}>
           <Text style={{ ...theme.type.micro, color: theme.colors.muted, letterSpacing: 1.2 }}>
             HOŞ GELDİN
           </Text>
@@ -74,7 +80,24 @@ export default function Dashboard() {
           </Text>
         </View>
 
-        <View style={{ flexDirection: "row", gap: theme.space.md, marginBottom: theme.space.xl }}>
+        <Card style={{ marginBottom: theme.space.xl, padding: theme.space.lg, borderColor: 'rgba(251,191,36,0.2)' }}>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: theme.space.sm }}>
+            <Text style={{ ...theme.type.micro, color: theme.colors.warning, letterSpacing: 1.2 }}>
+              GÜNÜN HADİSİ
+            </Text>
+            <Text style={{ ...theme.type.micro, color: theme.colors.muted }}>
+              {today.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long' })}
+            </Text>
+          </View>
+          <Text style={{ ...theme.type.small, color: theme.colors.text, lineHeight: 20, fontStyle: 'italic' }}>
+            "{dailyHadith.text}"
+          </Text>
+          <Text style={{ ...theme.type.micro, color: theme.colors.muted, marginTop: theme.space.sm, textAlign: 'right' }}>
+            — {dailyHadith.source}
+          </Text>
+        </Card>
+
+        <View style={{ flexDirection: "row", gap: theme.space.md, marginBottom: theme.space.md }}>
           <Card style={{ flex: 1, padding: theme.space.lg }}>
             <Text style={{ ...theme.type.micro, color: theme.colors.muted, letterSpacing: 1.2 }}>PUAN</Text>
             <Text style={{ ...theme.type.h3, color: theme.colors.text, marginTop: 8 }}>
@@ -90,6 +113,52 @@ export default function Dashboard() {
             <Text style={{ marginTop: 8, color: theme.colors.info, ...theme.type.small }}>🎯</Text>
           </Card>
         </View>
+
+        {(() => {
+          const { rank, next, percent, remaining } = getRankProgress(userData.totalScore);
+          return (
+            <Card style={{ marginBottom: theme.space.xl, padding: theme.space.lg }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: theme.space.md }}>
+                <View style={{
+                  width: 54, height: 54, borderRadius: theme.radius.md,
+                  backgroundColor: theme.colors.surface2,
+                  alignItems: 'center', justifyContent: 'center',
+                }}>
+                  <Text style={{ fontSize: 26 }}>{rank.emoji}</Text>
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ ...theme.type.micro, color: theme.colors.muted, letterSpacing: 1.2 }}>RÜTBE</Text>
+                  <Text style={{ ...theme.type.body, color: theme.colors.text, marginTop: 3, fontWeight: '800' }}>
+                    {rank.title}
+                  </Text>
+                </View>
+              </View>
+
+              {next ? (
+                <View style={{ marginTop: theme.space.md }}>
+                  <View style={{
+                    height: 6, backgroundColor: theme.colors.border,
+                    borderRadius: 3, overflow: 'hidden',
+                  }}>
+                    <View style={{
+                      height: 6,
+                      width: `${percent * 100}%`,
+                      backgroundColor: theme.colors.primary,
+                      borderRadius: 3,
+                    }} />
+                  </View>
+                  <Text style={{ ...theme.type.micro, color: theme.colors.muted, marginTop: 6 }}>
+                    {remaining} puan daha → {next.emoji} {next.title}
+                  </Text>
+                </View>
+              ) : (
+                <Text style={{ ...theme.type.micro, color: theme.colors.warning, marginTop: theme.space.sm }}>
+                  👑 En yüksek rütbedesin!
+                </Text>
+              )}
+            </Card>
+          );
+        })()}
 
         <View style={{ gap: theme.space.md }}>
           <Button text="Yarışmaya Başla" onPress={() => router.push({ pathname: '/categories', params: { userName: userData.displayName } })} />

@@ -11,6 +11,7 @@ import {
     View
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { getRank } from '../utils/rank';
 
 // FIREBASE
 import { collection, limit, onSnapshot, orderBy, query } from 'firebase/firestore';
@@ -52,6 +53,7 @@ export default function LiderlikTablosu() {
 
   const renderUserItem = ({ item, index }: { item: LeaderboardUser, index: number }) => {
     const isMe = item.id === auth.currentUser?.uid;
+    const rank = getRank(item.totalScore);
 
     return (
       <View style={[styles.userRow, isMe && styles.meRow]}>
@@ -76,7 +78,9 @@ export default function LiderlikTablosu() {
           <Text style={[styles.userName, isMe && styles.meText]}>
             {item.displayName || "İsimsiz"} {isMe && "(Siz)"}
           </Text>
-          <Text style={styles.userStats}>{item.completedQuizzes || 0} Test Çözdü</Text>
+          <Text style={styles.userStats}>
+            {rank.emoji} {rank.title} · {item.completedQuizzes || 0} Test
+          </Text>
         </View>
 
         <View style={styles.scoreContainer}>
