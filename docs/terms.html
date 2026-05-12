@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kullanım Koşulları — NamazQuiz</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #0B1220;
+      color: #EAF0FF;
+      line-height: 1.7;
+      padding: 0 16px 64px;
+    }
+
+    header {
+      text-align: center;
+      padding: 48px 0 32px;
+      border-bottom: 1px solid rgba(234,240,255,0.1);
+      margin-bottom: 40px;
+    }
+
+    header .icon { font-size: 48px; margin-bottom: 12px; }
+    header h1 { font-size: 26px; font-weight: 800; color: #4ADE80; }
+    header p  { font-size: 14px; color: #A7B2CC; margin-top: 6px; }
+
+    .container { max-width: 720px; margin: 0 auto; }
+
+    h2 {
+      font-size: 17px;
+      font-weight: 800;
+      color: #4ADE80;
+      margin: 36px 0 12px;
+      padding-left: 12px;
+      border-left: 3px solid #4ADE80;
+    }
+
+    p  { font-size: 15px; color: #C5CFDF; margin-bottom: 12px; }
+    ul { padding-left: 20px; margin-bottom: 12px; }
+    li { font-size: 15px; color: #C5CFDF; margin-bottom: 6px; }
+
+    a { color: #38BDF8; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .lang-switch {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 40px;
+    }
+    .lang-switch a {
+      background: rgba(234,240,255,0.08);
+      border: 1px solid rgba(234,240,255,0.12);
+      color: #A7B2CC;
+      padding: 8px 20px;
+      border-radius: 99px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .lang-switch a.active {
+      background: rgba(74,222,128,0.15);
+      border-color: rgba(74,222,128,0.3);
+      color: #4ADE80;
+    }
+
+    #en { display: none; }
+
+    footer {
+      text-align: center;
+      margin-top: 56px;
+      padding-top: 24px;
+      border-top: 1px solid rgba(234,240,255,0.1);
+      font-size: 13px;
+      color: #A7B2CC;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <div class="icon">🕌</div>
+    <h1>NamazQuiz</h1>
+    <p>Kullanım Koşulları / Terms of Service</p>
+  </header>
+
+  <div class="lang-switch">
+    <a href="#" class="active" onclick="showLang('tr', this); return false;">🇹🇷 Türkçe</a>
+    <a href="#" onclick="showLang('en', this); return false;">🇬🇧 English</a>
+  </div>
+
+  <!-- TÜRKÇE -->
+  <div id="tr">
+    <p>Son güncelleme: Mayıs 2026</p>
+
+    <h2>1. Kabul</h2>
+    <p>
+      NamazQuiz uygulamasını indirerek veya kullanarak bu Kullanım Koşulları'nı kabul etmiş sayılırsınız. Koşulları kabul etmiyorsanız uygulamayı kullanmayınız.
+    </p>
+
+    <h2>2. Hizmet Tanımı</h2>
+    <p>
+      NamazQuiz; namaz ve İslami bilgi konularında sorular, sözlük, günlük hadis ve liderlik tablosu içeren ücretsiz bir eğitim uygulamasıdır. Uygulama içinde reklam veya ücretli içerik bulunmamaktadır.
+    </p>
+
+    <h2>3. Hesap</h2>
+    <ul>
+      <li>Hesap oluşturmak için geçerli bir e-posta adresi ve şifre gereklidir.</li>
+      <li>Hesabınızın güvenliğinden siz sorumlusunuz.</li>
+      <li>13 yaşın altındaysanız uygulamayı kullanmayınız.</li>
+      <li>Başka bir kullanıcı adına hesap açamazsınız.</li>
+    </ul>
+
+    <h2>4. Kabul Edilemez Kullanım</h2>
+    <p>Aşağıdaki davranışlar yasaktır:</p>
+    <ul>
+      <li>Uygulamayı tersine mühendislik yapmak veya kaynak kodu elde etmeye çalışmak</li>
+      <li>Liderlik tablosunu veya puan sistemini manipüle etmek</li>
+      <li>Başka kullanıcıların verilerine erişmeye çalışmak</li>
+      <li>Hizmetin güvenliğini veya bütünlüğünü bozmaya yönelik her türlü girişim</li>
+    </ul>
+
+    <h2>5. İçerik</h2>
+    <p>
+      Uygulamadaki tüm sorular, hadisler ve sözlük içeriği yalnızca eğitim amaçlıdır. İçeriğin doğruluğu için özen gösterilmekle birlikte dini konularda yetkili bir alim veya kaynağa başvurulması tavsiye edilir.
+    </p>
+
+    <h2>6. Fikri Mülkiyet</h2>
+    <p>
+      Uygulamadaki tüm içerik, tasarım ve yazılım YAAY'a aittir. İzinsiz kopyalanamaz, dağıtılamaz veya ticari amaçla kullanılamaz.
+    </p>
+
+    <h2>7. Sorumluluk Reddi</h2>
+    <p>
+      Uygulama "olduğu gibi" sunulmaktadır. Kesintisiz veya hatasız hizmet garantisi verilmemektedir. Yasaların izin verdiği azami ölçüde, kullanımdan doğacak zararlardan sorumlu tutulamayız.
+    </p>
+
+    <h2>8. Hesap Silme</h2>
+    <p>
+      Hesabınızı ve tüm verilerinizi istediğiniz zaman uygulama içinden silebilirsiniz: <strong>Profil → Tehlikeli Alan → Hesabı Sil</strong>.
+    </p>
+
+    <h2>9. Değişiklikler</h2>
+    <p>
+      Bu koşullar zaman zaman güncellenebilir. Önemli değişikliklerde uygulama içinde bilgilendirme yapılır. Güncel koşullar her zaman bu sayfada yayınlanır.
+    </p>
+
+    <h2>10. İletişim</h2>
+    <p>
+      Sorularınız için:
+      <a href="mailto:yakupaydin1050@gmail.com">yakupaydin1050@gmail.com</a>
+    </p>
+
+    <p style="margin-top: 24px;">
+      <a href="privacy.html">→ Gizlilik Politikası</a>
+    </p>
+  </div>
+
+  <!-- ENGLISH -->
+  <div id="en">
+    <p>Last updated: May 2026</p>
+
+    <h2>1. Acceptance</h2>
+    <p>
+      By downloading or using NamazQuiz, you agree to these Terms of Service. If you do not agree, please do not use the app.
+    </p>
+
+    <h2>2. Description of Service</h2>
+    <p>
+      NamazQuiz is a free educational app featuring Islamic prayer quizzes, a glossary, a daily hadith, and a leaderboard. The app contains no ads or paid content.
+    </p>
+
+    <h2>3. Account</h2>
+    <ul>
+      <li>A valid email address and password are required to create an account.</li>
+      <li>You are responsible for the security of your account.</li>
+      <li>Do not use the app if you are under the age of 13.</li>
+      <li>You may not create an account on behalf of another person.</li>
+    </ul>
+
+    <h2>4. Prohibited Conduct</h2>
+    <p>The following actions are prohibited:</p>
+    <ul>
+      <li>Reverse engineering the app or attempting to obtain source code</li>
+      <li>Manipulating the leaderboard or scoring system</li>
+      <li>Attempting to access another user's data</li>
+      <li>Any action that undermines the security or integrity of the service</li>
+    </ul>
+
+    <h2>5. Content</h2>
+    <p>
+      All questions, hadiths, and glossary entries in the app are for educational purposes only. While we strive for accuracy, we recommend consulting a qualified Islamic scholar or authoritative source for religious matters.
+    </p>
+
+    <h2>6. Intellectual Property</h2>
+    <p>
+      All content, design, and software in the app belongs to YAAY. Unauthorized copying, distribution, or commercial use is not permitted.
+    </p>
+
+    <h2>7. Disclaimer</h2>
+    <p>
+      The app is provided "as is." We do not guarantee uninterrupted or error-free service. To the maximum extent permitted by law, we are not liable for any damages arising from use of the app.
+    </p>
+
+    <h2>8. Account Deletion</h2>
+    <p>
+      You may delete your account and all associated data at any time from within the app: <strong>Profile → Danger Zone → Delete Account</strong>.
+    </p>
+
+    <h2>9. Changes</h2>
+    <p>
+      These terms may be updated from time to time. For significant changes, an in-app notice will be displayed. The current terms are always published on this page.
+    </p>
+
+    <h2>10. Contact</h2>
+    <p>
+      For questions:
+      <a href="mailto:yakupaydin1050@gmail.com">yakupaydin1050@gmail.com</a>
+    </p>
+
+    <p style="margin-top: 24px;">
+      <a href="privacy.html">→ Privacy Policy</a>
+    </p>
+  </div>
+
+  <footer>
+    <p>NamazQuiz · YAAY · 2026</p>
+    <p style="margin-top:6px;">Made with ♥ and Claude</p>
+  </footer>
+
+</div>
+
+<script>
+  function showLang(lang, el) {
+    document.getElementById('tr').style.display = lang === 'tr' ? 'block' : 'none';
+    document.getElementById('en').style.display = lang === 'en' ? 'block' : 'none';
+    document.querySelectorAll('.lang-switch a').forEach(a => a.classList.remove('active'));
+    el.classList.add('active');
+  }
+</script>
+</body>
+</html>

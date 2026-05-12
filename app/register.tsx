@@ -1,6 +1,7 @@
 import { useRouter } from 'expo-router';
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
+import * as Linking from 'expo-linking';
 import React, { useState } from 'react';
 import {
   Alert, KeyboardAvoidingView, Platform,
@@ -105,6 +106,24 @@ export default function KayitEkrani() {
               </View>
 
               <Button text={loading ? "Hesap oluşturuluyor..." : "Kayıt Ol ve Başla"} onPress={handleRegister} disabled={loading} />
+
+              <Text style={{ fontSize: 12, color: theme.colors.muted, textAlign: 'center', lineHeight: 18 }}>
+                Kayıt olarak{' '}
+                <Text
+                  style={{ color: '#38BDF8', textDecorationLine: 'underline' }}
+                  onPress={() => Linking.openURL('https://yakupaydin1050.github.io/NamazQuiz/terms.html')}
+                >
+                  Kullanım Koşulları
+                </Text>
+                {'nı ve '}
+                <Text
+                  style={{ color: '#38BDF8', textDecorationLine: 'underline' }}
+                  onPress={() => Linking.openURL('https://yakupaydin1050.github.io/NamazQuiz/privacy.html')}
+                >
+                  Gizlilik Politikası
+                </Text>
+                {'nı kabul etmiş sayılırsınız.'}
+              </Text>
             </View>
           </Card>
 
