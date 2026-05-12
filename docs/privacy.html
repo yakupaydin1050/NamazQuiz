@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gizlilik Politikası — NamazQuiz</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #0B1220;
+      color: #EAF0FF;
+      line-height: 1.7;
+      padding: 0 16px 64px;
+    }
+
+    header {
+      text-align: center;
+      padding: 48px 0 32px;
+      border-bottom: 1px solid rgba(234,240,255,0.1);
+      margin-bottom: 40px;
+    }
+
+    header .icon { font-size: 48px; margin-bottom: 12px; }
+    header h1 { font-size: 26px; font-weight: 800; color: #4ADE80; }
+    header p  { font-size: 14px; color: #A7B2CC; margin-top: 6px; }
+
+    .container { max-width: 720px; margin: 0 auto; }
+
+    h2 {
+      font-size: 17px;
+      font-weight: 800;
+      color: #4ADE80;
+      margin: 36px 0 12px;
+      padding-left: 12px;
+      border-left: 3px solid #4ADE80;
+    }
+
+    p  { font-size: 15px; color: #C5CFDF; margin-bottom: 12px; }
+    ul { padding-left: 20px; margin-bottom: 12px; }
+    li { font-size: 15px; color: #C5CFDF; margin-bottom: 6px; }
+
+    .card {
+      background: #0F1A2E;
+      border: 1px solid rgba(234,240,255,0.1);
+      border-radius: 16px;
+      padding: 20px 24px;
+      margin-bottom: 12px;
+    }
+
+    .badge {
+      display: inline-block;
+      background: rgba(74,222,128,0.12);
+      color: #4ADE80;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 99px;
+      margin-bottom: 8px;
+      letter-spacing: 0.5px;
+    }
+
+    a { color: #38BDF8; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .lang-switch {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 40px;
+    }
+    .lang-switch a {
+      background: rgba(234,240,255,0.08);
+      border: 1px solid rgba(234,240,255,0.12);
+      color: #A7B2CC;
+      padding: 8px 20px;
+      border-radius: 99px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .lang-switch a.active {
+      background: rgba(74,222,128,0.15);
+      border-color: rgba(74,222,128,0.3);
+      color: #4ADE80;
+    }
+
+    #en { display: none; }
+
+    footer {
+      text-align: center;
+      margin-top: 56px;
+      padding-top: 24px;
+      border-top: 1px solid rgba(234,240,255,0.1);
+      font-size: 13px;
+      color: #A7B2CC;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <div class="icon">🕌</div>
+    <h1>NamazQuiz</h1>
+    <p>Gizlilik Politikası / Privacy Policy</p>
+  </header>
+
+  <div class="lang-switch">
+    <a href="#" class="active" onclick="showLang('tr', this); return false;">🇹🇷 Türkçe</a>
+    <a href="#" onclick="showLang('en', this); return false;">🇬🇧 English</a>
+  </div>
+
+  <!-- TÜRKÇE -->
+  <div id="tr">
+    <p>Son güncelleme: Mayıs 2025</p>
+
+    <h2>1. Giriş</h2>
+    <p>
+      NamazQuiz uygulamasını kullandığınız için teşekkür ederiz. Bu gizlilik politikası, uygulamamızın hangi verileri topladığını, bu verileri nasıl kullandığını ve koruduğunu açıklar. Uygulamayı kullanarak bu politikayı kabul etmiş sayılırsınız.
+    </p>
+
+    <h2>2. Toplanan Veriler</h2>
+
+    <div class="card">
+      <span class="badge">KİMLİK</span>
+      <p>Hesap oluştururken sağladığınız <strong>e-posta adresi</strong> ve <strong>kullanıcı adı</strong>.</p>
+    </div>
+
+    <div class="card">
+      <span class="badge">OYUN VERİSİ</span>
+      <p>Kazandığınız <strong>puanlar</strong>, tamamladığınız <strong>test sayısı</strong> ve zorluk seviyesi bilgileri. Bu veriler liderlik tablosunda görüntülenir.</p>
+    </div>
+
+    <div class="card">
+      <span class="badge">PROFİL FOTOĞRAFI</span>
+      <p>İsteğe bağlı olarak yüklediğiniz <strong>profil fotoğrafı</strong>. Yüklemeniz zorunlu değildir.</p>
+    </div>
+
+    <div class="card">
+      <span class="badge">GERİ BİLDİRİM</span>
+      <p>Hata bildirirken yazdığınız <strong>açıklama metni</strong>. Soru kalitesini artırmak için kullanılır.</p>
+    </div>
+
+    <h2>3. Verilerin Kullanım Amacı</h2>
+    <ul>
+      <li>Hesabınızı oluşturmak ve güvenli tutmak</li>
+      <li>Puanlarınızı kaydetmek ve liderlik tablosunu güncel tutmak</li>
+      <li>Profil sayfanızı kişiselleştirmek</li>
+      <li>Bildirilen hataları inceleyerek soru bankasını geliştirmek</li>
+    </ul>
+    <p>Verileriniz <strong>üçüncü taraf reklam ağlarıyla paylaşılmaz</strong>, satılmaz ve pazarlama amacıyla kullanılmaz.</p>
+
+    <h2>4. Kullanılan Hizmetler</h2>
+    <p>Uygulama aşağıdaki Google Firebase hizmetlerini kullanmaktadır:</p>
+    <ul>
+      <li><strong>Firebase Authentication</strong> — Kimlik doğrulama</li>
+      <li><strong>Cloud Firestore</strong> — Puan ve profil verisi depolama</li>
+      <li><strong>Firebase Storage</strong> — Profil fotoğrafı depolama</li>
+    </ul>
+    <p>
+      Google'ın gizlilik politikasına buradan ulaşabilirsiniz:
+      <a href="https://policies.google.com/privacy" target="_blank">policies.google.com/privacy</a>
+    </p>
+
+    <h2>5. Veri Güvenliği</h2>
+    <p>
+      Verileriniz Firebase'in güvenli altyapısında şifreli olarak saklanır. Yalnızca yetkili kullanıcılar kendi verilerine erişebilir; başka kullanıcıların verisine erişilemez.
+    </p>
+
+    <h2>6. Kullanıcı Hakları</h2>
+    <p>İstediğiniz zaman:</p>
+    <ul>
+      <li>Kullanıcı adınızı değiştirebilirsiniz</li>
+      <li>Profil fotoğrafınızı güncelleyebilirsiniz</li>
+      <li>Hesabınızı ve tüm verilerinizi kalıcı olarak silebilirsiniz (Profil → Tehlikeli Alan)</li>
+    </ul>
+
+    <h2>7. Çocukların Gizliliği</h2>
+    <p>
+      Uygulamamız 13 yaşın altındaki çocuklardan bilerek kişisel veri toplamaz. 13 yaşın altındaki bir kullanıcının veri bıraktığını fark ederseniz lütfen bizimle iletişime geçin.
+    </p>
+
+    <h2>8. Değişiklikler</h2>
+    <p>
+      Bu politika zaman zaman güncellenebilir. Önemli değişikliklerde uygulama içinde bilgilendirme yapılacaktır. Güncel politika her zaman bu sayfada yayınlanır.
+    </p>
+
+    <h2>9. İletişim</h2>
+    <p>
+      Sorularınız için:
+      <a href="mailto:yakupaydin1050@gmail.com">yakupaydin1050@gmail.com</a>
+    </p>
+  </div>
+
+  <!-- ENGLISH -->
+  <div id="en">
+    <p>Last updated: May 2025</p>
+
+    <h2>1. Introduction</h2>
+    <p>
+      Thank you for using NamazQuiz. This privacy policy explains what data our app collects, how it is used, and how it is protected. By using the app, you agree to this policy.
+    </p>
+
+    <h2>2. Data We Collect</h2>
+
+    <div class="card">
+      <span class="badge">IDENTITY</span>
+      <p>Your <strong>email address</strong> and <strong>display name</strong> provided when creating an account.</p>
+    </div>
+
+    <div class="card">
+      <span class="badge">GAME DATA</span>
+      <p>Your <strong>scores</strong>, <strong>completed quizzes</strong>, and difficulty level information. This data is displayed on the leaderboard.</p>
+    </div>
+
+    <div class="card">
+      <span class="badge">PROFILE PHOTO</span>
+      <p>An optional <strong>profile photo</strong> you choose to upload. Uploading is not required.</p>
+    </div>
+
+    <div class="card">
+      <span class="badge">FEEDBACK</span>
+      <p>Any <strong>comment text</strong> submitted via the error report feature. Used solely to improve question quality.</p>
+    </div>
+
+    <h2>3. How We Use Your Data</h2>
+    <ul>
+      <li>To create and secure your account</li>
+      <li>To save your scores and keep the leaderboard up to date</li>
+      <li>To personalize your profile page</li>
+      <li>To review reported errors and improve the question bank</li>
+    </ul>
+    <p>Your data is <strong>never shared with third-party ad networks</strong>, sold, or used for marketing purposes.</p>
+
+    <h2>4. Services Used</h2>
+    <p>The app uses the following Google Firebase services:</p>
+    <ul>
+      <li><strong>Firebase Authentication</strong> — Identity verification</li>
+      <li><strong>Cloud Firestore</strong> — Score and profile data storage</li>
+      <li><strong>Firebase Storage</strong> — Profile photo storage</li>
+    </ul>
+    <p>
+      Google's privacy policy is available at:
+      <a href="https://policies.google.com/privacy" target="_blank">policies.google.com/privacy</a>
+    </p>
+
+    <h2>5. Data Security</h2>
+    <p>
+      Your data is stored encrypted on Firebase's secure infrastructure. Only authorized users can access their own data; no user can access another user's data.
+    </p>
+
+    <h2>6. Your Rights</h2>
+    <p>At any time, you may:</p>
+    <ul>
+      <li>Change your display name</li>
+      <li>Update your profile photo</li>
+      <li>Permanently delete your account and all associated data (Profile → Danger Zone)</li>
+    </ul>
+
+    <h2>7. Children's Privacy</h2>
+    <p>
+      Our app does not knowingly collect personal data from children under the age of 13. If you believe a child under 13 has provided data, please contact us.
+    </p>
+
+    <h2>8. Changes to This Policy</h2>
+    <p>
+      This policy may be updated from time to time. For significant changes, an in-app notice will be displayed. The current policy is always published on this page.
+    </p>
+
+    <h2>9. Contact</h2>
+    <p>
+      For questions:
+      <a href="mailto:yakupaydin1050@gmail.com">yakupaydin1050@gmail.com</a>
+    </p>
+  </div>
+
+  <footer>
+    <p>NamazQuiz · YAAY · 2025</p>
+    <p style="margin-top:6px;">Made with ♥ and Claude</p>
+  </footer>
+
+</div>
+
+<script>
+  function showLang(lang, el) {
+    document.getElementById('tr').style.display = lang === 'tr' ? 'block' : 'none';
+    document.getElementById('en').style.display = lang === 'en' ? 'block' : 'none';
+    document.querySelectorAll('.lang-switch a').forEach(a => a.classList.remove('active'));
+    el.classList.add('active');
+  }
+</script>
+</body>
+</html>

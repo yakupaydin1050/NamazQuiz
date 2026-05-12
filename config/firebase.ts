@@ -21,6 +21,6 @@ export const auth = isNew
   : getAuth(app);
 
 export const db = getFirestore(app);
-export const storage = getStorage(app);
+export const storage = getStorage(app, 'gs://namaz-quiz.firebasestorage.app');
 
 export default app;
