@@ -75,7 +75,7 @@ export default function Dashboard() {
             HOŞ GELDİN
           </Text>
           <Text style={{ ...theme.type.h2, color: theme.colors.text, marginTop: 6 }}>
-            {userData.displayName.toUpperCase()}{" "}
+            {(userData.displayName || 'Oyuncu').toUpperCase()}{" "}
             <Text style={{ color: theme.colors.muted }}>👋</Text>
           </Text>
         </View>

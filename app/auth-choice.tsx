@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { signInAnonymously, updateProfile } from 'firebase/auth';
+import { doc, setDoc } from 'firebase/firestore';
 import React, { useState } from 'react';
 import {
   ActivityIndicator,
@@ -17,7 +18,7 @@ import { Card } from '../components/ui/Card';
 import { Input } from '../components/ui/Input';
 import { Screen } from '../components/ui/Screen';
 import { theme } from '../components/ui/theme';
-import { auth } from '../config/firebase';
+import { auth, db } from '../config/firebase';
 
 export default function AuthChoice() {
   const router = useRouter();
@@ -42,6 +43,14 @@ export default function AuthChoice() {
     try {
       const userCredential = await signInAnonymously(auth);
       await updateProfile(userCredential.user, { displayName: name });
+      await setDoc(doc(db, "users", userCredential.user.uid), {
+        uid: userCredential.user.uid,
+        displayName: name,
+        email: "misafir@quiz.com",
+        totalScore: 0,
+        completedQuizzes: 0,
+        createdAt: new Date().toISOString(),
+      });
     } catch (error) {
       console.error(error);
       Alert.alert("Hata", "Misafir girişi yapılamadı.");

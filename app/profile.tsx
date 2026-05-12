@@ -10,7 +10,7 @@ import {
   updateProfile,
   deleteUser,
 } from "firebase/auth";
-import { deleteDoc, doc, setDoc } from "firebase/firestore";
+import { deleteDoc, doc, runTransaction, setDoc } from "firebase/firestore";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { auth, db, storage } from "../config/firebase";
 import { Button } from "../components/ui/Button";
@@ -143,15 +143,22 @@ export default function ProfileSettings() {
     setSavingName(true);
     try {
       await updateProfile(user, { displayName: next });
-      await setDoc(
-        doc(db, "users", user.uid),
-        {
-          uid: user.uid,
-          displayName: next,
-          email: user.email ?? "misafir@quiz.com",
-        },
-        { merge: true }
-      );
+      const userRef = doc(db, "users", user.uid);
+      await runTransaction(db, async (tx) => {
+        const snap = await tx.get(userRef);
+        if (snap.exists()) {
+          tx.update(userRef, { displayName: next });
+        } else {
+          tx.set(userRef, {
+            uid: user.uid,
+            displayName: next,
+            email: user.email ?? "misafir@quiz.com",
+            totalScore: 0,
+            completedQuizzes: 0,
+            createdAt: new Date().toISOString(),
+          });
+        }
+      });
       Alert.alert("Tamam", "Kullanıcı adı güncellendi.");
     } catch (e) {
       console.error(e);
@@ -294,7 +301,7 @@ export default function ProfileSettings() {
                 <Image source={{ uri: photoURL }} style={{ width: 96, height: 96 }} />
               ) : (
                 <Text style={{ fontSize: 36, fontWeight: "700", color: theme.colors.muted }}>
-                  {(user.displayName ?? "?")[0].toUpperCase()}
+                  {(user.displayName || "?")[0].toUpperCase()}
                 </Text>
               )}
             </View>
