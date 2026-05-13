@@ -53,6 +53,7 @@ export default function YarışmaEkranı() {
   const [revealedAnswers, setRevealedAnswers] = useState<Set<number>>(new Set());
   const [skippedQuestions, setSkippedQuestions] = useState<Set<number>>(new Set());
   const [showQuitModal, setShowQuitModal] = useState(false);
+  const [wasEarlyQuit, setWasEarlyQuit] = useState(false);
   const questionStartTime = useRef(Date.now());
 
   // Firestore'dan soruları çek
@@ -91,13 +92,15 @@ export default function YarışmaEkranı() {
   }, [isFinished, loadingQuestions]);
 
   // TESTİ BİTİR VE VERİTABANINA KAYDET
-  const handleFinishQuiz = async () => {
+  const handleFinishQuiz = async (earlyQuit = false) => {
     if (isSaving) return;
 
     setIsFinished(true);
+    setWasEarlyQuit(earlyQuit);
     setIsSaving(true);
 
     const user = auth.currentUser;
+    const pointsToSave = earlyQuit ? Math.floor(score / 2) : score;
 
     if (user) {
       try {
@@ -110,29 +113,20 @@ export default function YarışmaEkranı() {
           const prevTotalScore = typeof data.totalScore === "number" ? data.totalScore : 0;
           const prevCompleted = typeof data.completedQuizzes === "number" ? data.completedQuizzes : 0;
 
-          const nextTotalScore = prevTotalScore + score;
-          const nextCompleted = prevCompleted + 1;
-
           tx.set(
             userRef,
             {
               uid: user.uid,
               email: user.email || "misafir@quiz.com",
               displayName: user.displayName || data.displayName || "İsimsiz Oyuncu",
-              totalScore: nextTotalScore,
-              completedQuizzes: nextCompleted,
+              totalScore: prevTotalScore + pointsToSave,
+              completedQuizzes: earlyQuit ? prevCompleted : prevCompleted + 1,
               lastPlayed: serverTimestamp(),
-              lastQuiz: {
-                score,
-                seconds,
-                level,
-              },
+              lastQuiz: { score: pointsToSave, seconds, level },
             },
             { merge: true }
           );
         });
-
-        console.log("Toplam puan ve test sayısı kaydedildi.");
       } catch (error: any) {
         console.error("Firestore Kayıt Hatası:", error.message);
       }
@@ -239,9 +233,13 @@ export default function YarışmaEkranı() {
     return (
       <SafeAreaView style={styles.resultContainer}>
         <Stack.Screen options={{ headerShown: false }} />
-        <Text style={styles.resultEmoji}>🏆</Text>
-        <Text style={styles.resultTitle}>Tebrikler!</Text>
-        <Text style={styles.resultSubtitle}>Yarışma sonuçların kaydedildi.</Text>
+        <Text style={styles.resultEmoji}>{wasEarlyQuit ? '⏹️' : '🏆'}</Text>
+        <Text style={styles.resultTitle}>{wasEarlyQuit ? 'Test Yarıda Bırakıldı' : 'Tebrikler!'}</Text>
+        <Text style={styles.resultSubtitle}>
+          {wasEarlyQuit
+            ? 'Kazandığın puanların yarısı kaydedildi. Tamamlanan test sayına eklenmedi.'
+            : 'Tüm soruları bitirdin! Sonuçların kaydedildi.'}
+        </Text>
 
         <View style={styles.statsGrid}>
           <View style={styles.statCard}>
@@ -416,7 +414,8 @@ export default function YarışmaEkranı() {
           <View style={{ width: '100%', backgroundColor: theme.colors.surface, borderRadius: 20, padding: theme.space.xl, gap: theme.space.md }}>
             <Text style={{ fontSize: 20, fontWeight: '800', color: theme.colors.text, textAlign: 'center' }}>Yarışmayı Bitir</Text>
             <Text style={{ fontSize: 14, color: theme.colors.muted, textAlign: 'center', lineHeight: 20 }}>
-              Şu ana kadar kazandığın puanlar kaydedilecek. Devam etmek istiyor musun?
+              Kazandığın <Text style={{ color: theme.colors.warning, fontWeight: '800' }}>{Math.floor(score / 2)} puan</Text> kaydedilecek.{'\n'}
+              Bu test tamamlanan testler arasında görünmeyecek.
             </Text>
             <View style={{ flexDirection: 'row', gap: theme.space.sm, marginTop: theme.space.xs }}>
               <TouchableOpacity
@@ -426,7 +425,7 @@ export default function YarışmaEkranı() {
                 <Text style={{ fontSize: 15, fontWeight: '700', color: theme.colors.text }}>Devam Et</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                onPress={() => { setShowQuitModal(false); handleFinishQuiz(); }}
+                onPress={() => { setShowQuitModal(false); handleFinishQuiz(true); }}
                 style={{ flex: 1, padding: 14, borderRadius: 12, backgroundColor: theme.colors.danger, alignItems: 'center' }}
               >
                 <Text style={{ fontSize: 15, fontWeight: '800', color: '#fff' }}>Bitir</Text>
