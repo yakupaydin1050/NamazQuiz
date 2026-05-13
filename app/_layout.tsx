@@ -1,4 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Ionicons } from "@expo/vector-icons";
+import { useFonts } from "expo-font";
 import { Stack, useRouter, useSegments } from "expo-router";
 import { onAuthStateChanged } from "firebase/auth";
 import { useEffect, useState } from "react";
@@ -12,8 +14,11 @@ export default function RootLayout() {
   const router = useRouter();
   const segments = useSegments();
 
+  const [fontsLoaded] = useFonts({
+    ...Ionicons.font,
+  });
+
   useEffect(() => {
-    // Sadece ilk yükleme için hazır sinyali — taze okuma routing efektinde yapılır
     AsyncStorage.getItem("onboardingDone").then(() => setReady(true));
   }, []);
 
@@ -29,12 +34,11 @@ export default function RootLayout() {
     if (initializing || !ready) return;
 
     const route = async () => {
-      // Her seferinde AsyncStorage'dan taze oku — stale state sorunu olmaz
       const val = await AsyncStorage.getItem("onboardingDone");
       const onboardingDone = val === "true";
 
       const inOnboarding = segments[0] === "onboarding";
-      const inAuthGroup = segments[0] === "login" || segments[0] === "register" || segments[0] === "auth-choice" || segments[0] === "index";
+      const inAuthGroup = ["login", "register", "auth-choice", "index"].includes(segments[0] as string);
 
       if (!onboardingDone && !user && !inOnboarding) {
         router.replace("/onboarding");
@@ -51,7 +55,7 @@ export default function RootLayout() {
     route();
   }, [user, initializing, ready, segments]);
 
-  if (initializing || !ready) {
+  if (initializing || !ready || !fontsLoaded) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#0B1220' }}>
         <ActivityIndicator size="large" color="#4ADE80" />
