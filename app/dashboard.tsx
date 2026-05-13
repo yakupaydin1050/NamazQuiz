@@ -1,8 +1,8 @@
 import { Stack, useRouter } from 'expo-router';
 import { signOut } from 'firebase/auth';
-import { addDoc, collection, doc, onSnapshot, serverTimestamp } from 'firebase/firestore';
+import { doc, onSnapshot } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, KeyboardAvoidingView, Modal, Platform, ScrollView, Share, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, ScrollView, Share, Text, View } from 'react-native';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { Screen } from '../components/ui/Screen';
@@ -17,10 +17,6 @@ export default function Dashboard() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [userData, setUserData] = useState({ totalScore: 0, completedQuizzes: 0, displayName: auth.currentUser?.displayName || 'Oyuncu' });
-  const [feedbackVisible, setFeedbackVisible] = useState(false);
-  const [feedbackText, setFeedbackText] = useState('');
-  const [sendingFeedback, setSendingFeedback] = useState(false);
-
   useEffect(() => {
     const user = auth.currentUser;
     if (!user) {
@@ -166,7 +162,6 @@ export default function Dashboard() {
           <Button text="Liderlik Tablosu" onPress={() => router.push('/leaderboard')} variant="secondary" />
           <Button text="Profil & Güvenlik" onPress={() => router.push('/profile')} variant="secondary" />
           <Button text="Arkadaşına Tavsiye Et" onPress={handleShare} variant="ghost" />
-          <Button text="Geri Bildirim Gönder" onPress={() => setFeedbackVisible(true)} variant="ghost" />
         </View>
 
         <View style={{ marginTop: theme.space.xl }}>
@@ -174,72 +169,6 @@ export default function Dashboard() {
         </View>
 
       </ScrollView>
-
-      <Modal visible={feedbackVisible} transparent animationType="fade" onRequestClose={() => setFeedbackVisible(false)}>
-        <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.6)', padding: 24 }}
-        >
-          <View style={{ width: '100%', backgroundColor: theme.colors.surface, borderRadius: 20, padding: theme.space.xl, gap: theme.space.md }}>
-            <Text style={{ ...theme.type.h3, color: theme.colors.text }}>Geri Bildirim</Text>
-            <Text style={{ ...theme.type.small, color: theme.colors.muted }}>
-              Öneri, şikayet veya her türlü görüşünü yazabilirsin.
-            </Text>
-            <TextInput
-              value={feedbackText}
-              onChangeText={setFeedbackText}
-              placeholder="Görüşünü yaz..."
-              placeholderTextColor={theme.colors.muted}
-              multiline
-              style={{
-                backgroundColor: theme.colors.surface2,
-                borderRadius: 12,
-                padding: 14,
-                color: theme.colors.text,
-                height: 100,
-                textAlignVertical: 'top',
-                fontSize: 14,
-              }}
-            />
-            <View style={{ flexDirection: 'row', gap: theme.space.sm }}>
-              <TouchableOpacity
-                onPress={() => { setFeedbackVisible(false); setFeedbackText(''); }}
-                style={{ flex: 1, padding: 14, borderRadius: 12, backgroundColor: theme.colors.border, alignItems: 'center' }}
-              >
-                <Text style={{ ...theme.type.body, color: theme.colors.muted, fontWeight: '700' }}>İptal</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                disabled={sendingFeedback}
-                onPress={async () => {
-                  if (!feedbackText.trim()) { Alert.alert('Hata', 'Lütfen bir şeyler yaz.'); return; }
-                  setSendingFeedback(true);
-                  try {
-                    await addDoc(collection(db, 'feedback'), {
-                      comment: feedbackText.trim(),
-                      userId: auth.currentUser?.uid ?? 'anonim',
-                      type: 'general',
-                      createdAt: serverTimestamp(),
-                    });
-                    setFeedbackVisible(false);
-                    setFeedbackText('');
-                    Alert.alert('Teşekkürler!', 'Geri bildiriminiz iletildi.');
-                  } catch {
-                    Alert.alert('Hata', 'Gönderilemedi, tekrar dene.');
-                  } finally {
-                    setSendingFeedback(false);
-                  }
-                }}
-                style={{ flex: 1, padding: 14, borderRadius: 12, backgroundColor: theme.colors.primary, alignItems: 'center', opacity: sendingFeedback ? 0.6 : 1 }}
-              >
-                <Text style={{ ...theme.type.body, color: '#000', fontWeight: '800' }}>
-                  {sendingFeedback ? 'Gönderiliyor...' : 'Gönder'}
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </KeyboardAvoidingView>
-      </Modal>
-
     </Screen>
   );
 }

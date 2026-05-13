@@ -1,9 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
-import * as Linking from "expo-linking";
 import { Stack, useRouter } from "expo-router";
 import React, { useState } from "react";
-import { ActivityIndicator, Alert, Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Alert, Image, KeyboardAvoidingView, Modal, Platform, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
 import {
   EmailAuthProvider,
   reauthenticateWithCredential,
@@ -11,7 +10,7 @@ import {
   updateProfile,
   deleteUser,
 } from "firebase/auth";
-import { deleteDoc, doc, runTransaction, setDoc } from "firebase/firestore";
+import { addDoc, collection, deleteDoc, doc, runTransaction, serverTimestamp, setDoc } from "firebase/firestore";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { auth, db, storage } from "../config/firebase";
 import { Button } from "../components/ui/Button";
@@ -62,6 +61,10 @@ export default function ProfileSettings() {
   const [savingPassword, setSavingPassword] = useState(false);
 
   const [deleting, setDeleting] = useState(false);
+  const [legalModal, setLegalModal] = useState<'privacy' | 'terms' | null>(null);
+  const [feedbackVisible, setFeedbackVisible] = useState(false);
+  const [feedbackText, setFeedbackText] = useState('');
+  const [sendingFeedback, setSendingFeedback] = useState(false);
 
   if (!user) {
     return (
@@ -409,6 +412,16 @@ export default function ProfileSettings() {
           )}
         </Card>
 
+        <Card>
+          <Text style={{ ...theme.type.h3, color: theme.colors.text }}>Geri Bildirim</Text>
+          <Text style={{ ...theme.type.small, color: theme.colors.muted, marginTop: 8 }}>
+            Öneri veya şikayetlerini bizimle paylaş.
+          </Text>
+          <View style={{ marginTop: theme.space.md }}>
+            <Button text="Geri Bildirim Gönder" onPress={() => setFeedbackVisible(true)} variant="secondary" />
+          </View>
+        </Card>
+
         <Card style={{ borderColor: "rgba(251,113,133,0.35)" }}>
           <Text style={{ ...theme.type.h3, color: theme.colors.text }}>Tehlikeli Alan</Text>
           <Text style={{ ...theme.type.small, color: theme.colors.muted, marginTop: 8 }}>
@@ -429,15 +442,15 @@ export default function ProfileSettings() {
 
         <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 20, paddingVertical: theme.space.md }}>
           <Text
-            style={{ ...theme.type.micro, color: '#38BDF8', textDecorationLine: 'underline' }}
-            onPress={() => Linking.openURL('https://yakupaydin1050.github.io/NamazQuiz/privacy.html')}
+            style={{ ...theme.type.micro, color: theme.colors.info, textDecorationLine: 'underline' }}
+            onPress={() => setLegalModal('privacy')}
           >
             Gizlilik Politikası
           </Text>
           <Text style={{ ...theme.type.micro, color: theme.colors.border }}>|</Text>
           <Text
-            style={{ ...theme.type.micro, color: '#38BDF8', textDecorationLine: 'underline' }}
-            onPress={() => Linking.openURL('https://yakupaydin1050.github.io/NamazQuiz/terms.html')}
+            style={{ ...theme.type.micro, color: theme.colors.info, textDecorationLine: 'underline' }}
+            onPress={() => setLegalModal('terms')}
           >
             Kullanım Koşulları
           </Text>
@@ -458,7 +471,137 @@ export default function ProfileSettings() {
           </Text>
         </View>
       </ScrollView>
+
+      {/* Gizlilik / Kullanım Koşulları Modal */}
+      <Modal visible={legalModal !== null} animationType="slide" transparent onRequestClose={() => setLegalModal(null)}>
+        <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.45)", justifyContent: "flex-end" }}>
+          <View style={{ backgroundColor: theme.colors.bg, borderTopLeftRadius: 24, borderTopRightRadius: 24, maxHeight: "80%", padding: theme.space.xl }}>
+            <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: theme.space.lg }}>
+              <Text style={{ ...theme.type.h3, color: theme.colors.text }}>
+                {legalModal === 'privacy' ? 'Gizlilik Politikası' : 'Kullanım Koşulları'}
+              </Text>
+              <TouchableOpacity onPress={() => setLegalModal(null)} hitSlop={12}>
+                <Ionicons name="close" size={24} color={theme.colors.muted} />
+              </TouchableOpacity>
+            </View>
+            <ScrollView showsVerticalScrollIndicator={false}>
+              {legalModal === 'privacy' ? (
+                <>
+                  <LegalSection title="Bu uygulama nedir?">
+                    Namaz Quiz, namaz bilgini eğlenceli bir şekilde test etmen için geliştirilmiş ücretsiz bir uygulamadır.
+                  </LegalSection>
+                  <LegalSection title="Hangi veriler toplanır?">
+                    Hesap oluşturursan e-posta adresin ve kullanıcı adın kaydedilir. Quiz sonuçların ve toplam puanın liderlik tablosunu oluşturmak için saklanır. Misafir olarak giriş yaparsan yalnızca kullanıcı adın ve puanların tutulur.
+                  </LegalSection>
+                  <LegalSection title="Veriler neden kullanılır?">
+                    Hesabını yönetmek, liderlik tablosunu göstermek ve kaldığın yerden devam etmeni sağlamak için kullanılır. Başka bir amaçla kullanılmaz.
+                  </LegalSection>
+                  <LegalSection title="Veriler paylaşılıyor mu?">
+                    Hayır. Veriler hiçbir üçüncü tarafla paylaşılmaz ve satılmaz. Yalnızca Firebase (Google) altyapısında güvenli biçimde saklanır.
+                  </LegalSection>
+                  <LegalSection title="Hesabımı silebilir miyim?">
+                    Evet. Bu sayfadan hesabını ve tüm verilerini kalıcı olarak silebilirsin.
+                  </LegalSection>
+                </>
+              ) : (
+                <>
+                  <LegalSection title="Kabul">
+                    Uygulamayı kullanarak bu koşulları kabul etmiş sayılırsın.
+                  </LegalSection>
+                  <LegalSection title="Hizmet">
+                    NamazQuiz; sorular, sözlük, günlük hadis ve liderlik tablosu içeren ücretsiz bir eğitim uygulamasıdır. Reklam veya ücretli içerik yoktur.
+                  </LegalSection>
+                  <LegalSection title="Hesap">
+                    Hesabının güvenliğinden kendin sorumlusun. 13 yaşın altındaysan uygulamayı kullanmamalısın.
+                  </LegalSection>
+                  <LegalSection title="Yasak Davranışlar">
+                    Uygulamayı tersine mühendislik yapmak, puan sistemini manipüle etmek ve başka kullanıcıların verilerine erişmeye çalışmak yasaktır.
+                  </LegalSection>
+                  <LegalSection title="Hesap Silme">
+                    Hesabını ve tüm verilerini istediğin zaman bu sayfadan silebilirsin.
+                  </LegalSection>
+                </>
+              )}
+              <Text style={{ ...theme.type.micro, color: theme.colors.muted, marginTop: theme.space.lg, marginBottom: theme.space.sm }}>
+                Son güncelleme: Mayıs 2026
+              </Text>
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Geri Bildirim Modal */}
+      <Modal visible={feedbackVisible} transparent animationType="fade" onRequestClose={() => setFeedbackVisible(false)}>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.6)', padding: 24 }}
+        >
+          <View style={{ width: '100%', backgroundColor: theme.colors.surface, borderRadius: 20, padding: theme.space.xl, gap: theme.space.md }}>
+            <Text style={{ ...theme.type.h3, color: theme.colors.text }}>Geri Bildirim</Text>
+            <Text style={{ ...theme.type.small, color: theme.colors.muted }}>
+              Öneri, şikayet veya her türlü görüşünü yazabilirsin.
+            </Text>
+            <TextInput
+              value={feedbackText}
+              onChangeText={setFeedbackText}
+              placeholder="Görüşünü yaz..."
+              placeholderTextColor={theme.colors.placeholder}
+              multiline
+              style={{ backgroundColor: theme.colors.surface2, borderRadius: 12, padding: 14, color: theme.colors.text, height: 100, textAlignVertical: 'top', fontSize: 14 }}
+            />
+            <View style={{ flexDirection: 'row', gap: theme.space.sm }}>
+              <TouchableOpacity
+                onPress={() => { setFeedbackVisible(false); setFeedbackText(''); }}
+                style={{ flex: 1, padding: 14, borderRadius: 12, backgroundColor: theme.colors.surface2, alignItems: 'center', borderWidth: 1, borderColor: theme.colors.border }}
+              >
+                <Text style={{ ...theme.type.body, color: theme.colors.muted, fontWeight: '700' }}>İptal</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                disabled={sendingFeedback}
+                onPress={async () => {
+                  if (!feedbackText.trim()) { Alert.alert('Hata', 'Lütfen bir şeyler yaz.'); return; }
+                  setSendingFeedback(true);
+                  try {
+                    await addDoc(collection(db, 'feedback'), {
+                      comment: feedbackText.trim(),
+                      userId: auth.currentUser?.uid ?? 'anonim',
+                      type: 'general',
+                      createdAt: serverTimestamp(),
+                    });
+                    setFeedbackVisible(false);
+                    setFeedbackText('');
+                    Alert.alert('Teşekkürler!', 'Geri bildiriminiz iletildi.');
+                  } catch {
+                    Alert.alert('Hata', 'Gönderilemedi, tekrar dene.');
+                  } finally {
+                    setSendingFeedback(false);
+                  }
+                }}
+                style={{ flex: 1, padding: 14, borderRadius: 12, backgroundColor: theme.colors.primary, alignItems: 'center', opacity: sendingFeedback ? 0.6 : 1 }}
+              >
+                <Text style={{ ...theme.type.body, color: '#000', fontWeight: '800' }}>
+                  {sendingFeedback ? 'Gönderiliyor...' : 'Gönder'}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
+
     </Screen>
+  );
+}
+
+function LegalSection({ title, children }: { title: string; children: string }) {
+  return (
+    <View style={{ marginBottom: theme.space.lg }}>
+      <Text style={{ fontSize: 13, color: theme.colors.text, fontWeight: '700', marginBottom: 6 }}>
+        {title}
+      </Text>
+      <Text style={{ fontSize: 13, color: theme.colors.muted, lineHeight: 20 }}>
+        {children}
+      </Text>
+    </View>
   );
 }
 
