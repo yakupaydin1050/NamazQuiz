@@ -412,11 +412,24 @@ export default function YarışmaEkranı() {
       <Modal visible={showQuitModal} transparent animationType="fade" onRequestClose={() => setShowQuitModal(false)}>
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.65)', padding: 24 }}>
           <View style={{ width: '100%', backgroundColor: theme.colors.surface, borderRadius: 20, padding: theme.space.xl, gap: theme.space.md }}>
-            <Text style={{ fontSize: 20, fontWeight: '800', color: theme.colors.text, textAlign: 'center' }}>Yarışmayı Bitir</Text>
-            <Text style={{ fontSize: 14, color: theme.colors.muted, textAlign: 'center', lineHeight: 20 }}>
-              Kazandığın <Text style={{ color: theme.colors.warning, fontWeight: '800' }}>{Math.floor(score / 2)} puan</Text> kaydedilecek.{'\n'}
-              Bu test tamamlanan testler arasında görünmeyecek.
-            </Text>
+            <Text style={{ fontSize: 20, fontWeight: '800', color: theme.colors.text, textAlign: 'center' }}>Erken Bitir</Text>
+            <View style={{ gap: 10 }}>
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: theme.colors.surface2, borderRadius: 12, paddingHorizontal: 16, paddingVertical: 10 }}>
+                <Text style={{ fontSize: 13, color: theme.colors.muted }}>Şu anki puanın</Text>
+                <Text style={{ fontSize: 15, fontWeight: '800', color: theme.colors.text }}>{score} puan</Text>
+              </View>
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: 'rgba(251,191,36,0.1)', borderRadius: 12, paddingHorizontal: 16, paddingVertical: 10, borderWidth: 1, borderColor: 'rgba(251,191,36,0.25)' }}>
+                <Text style={{ fontSize: 13, color: theme.colors.muted }}>Hesabına eklenecek</Text>
+                <Text style={{ fontSize: 15, fontWeight: '800', color: theme.colors.warning }}>+{Math.floor(score / 2)} puan</Text>
+              </View>
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: 'rgba(34,197,94,0.08)', borderRadius: 12, paddingHorizontal: 16, paddingVertical: 10, borderWidth: 1, borderColor: 'rgba(34,197,94,0.2)' }}>
+                <Text style={{ fontSize: 13, color: theme.colors.muted }}>Testi bitirirsen</Text>
+                <Text style={{ fontSize: 15, fontWeight: '800', color: theme.colors.primary }}>+{score} puan</Text>
+              </View>
+              <Text style={{ fontSize: 12, color: theme.colors.muted, textAlign: 'center', marginTop: 2 }}>
+                Bu test tamamlanan testler arasına girmeyecek.
+              </Text>
+            </View>
             <View style={{ flexDirection: 'row', gap: theme.space.sm, marginTop: theme.space.xs }}>
               <TouchableOpacity
                 onPress={() => setShowQuitModal(false)}
