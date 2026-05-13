@@ -1,5 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
+import * as Linking from "expo-linking";
 import { Stack, useRouter } from "expo-router";
 import React, { useState } from "react";
 import { ActivityIndicator, Alert, Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
@@ -425,6 +426,22 @@ export default function ProfileSettings() {
         </Card>
 
         <View style={{ borderTopWidth: 1, borderTopColor: theme.colors.border, marginTop: theme.space.sm }} />
+
+        <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 20, paddingVertical: theme.space.md }}>
+          <Text
+            style={{ ...theme.type.micro, color: '#38BDF8', textDecorationLine: 'underline' }}
+            onPress={() => Linking.openURL('https://yakupaydin1050.github.io/NamazQuiz/privacy.html')}
+          >
+            Gizlilik Politikası
+          </Text>
+          <Text style={{ ...theme.type.micro, color: theme.colors.border }}>|</Text>
+          <Text
+            style={{ ...theme.type.micro, color: '#38BDF8', textDecorationLine: 'underline' }}
+            onPress={() => Linking.openURL('https://yakupaydin1050.github.io/NamazQuiz/terms.html')}
+          >
+            Kullanım Koşulları
+          </Text>
+        </View>
 
         <View style={{ alignItems: "center", gap: 6, paddingVertical: theme.space.lg }}>
           <Text style={{ ...theme.type.small, color: theme.colors.text, fontWeight: "700", letterSpacing: 0.5 }}>

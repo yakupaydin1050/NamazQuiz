@@ -9,6 +9,7 @@ import {
   Platform,
   SafeAreaView,
   ScrollView,
+  Share,
   StyleSheet,
   Text,
   TextInput,
@@ -172,6 +173,19 @@ export default function YarışmaEkranı() {
     setUserAnswers(prev => ({ ...prev, [currentIndex]: currentQuestion.correct }));
   };
 
+  const handleShareQuestion = async () => {
+    try {
+      const optionLabels = currentQuestion.options
+        .map((opt: string, i: number) => `${String.fromCharCode(65 + i)}) ${opt}`)
+        .join('\n');
+      await Share.share({
+        message: `📖 NamazQuiz Sorusu\n\n${currentQuestion.question}\n\n${optionLabels}\n\n✅ Doğru Cevap: ${currentQuestion.correct}\n\n🕌 NamazQuiz'i dene!`,
+      });
+    } catch {
+      // kullanıcı iptal etti
+    }
+  };
+
   const handleSkip = () => {
     if (selectedAnswer || isFinished) return;
     setSkippedQuestions(prev => new Set([...prev, currentIndex]));
@@ -300,7 +314,7 @@ export default function YarışmaEkranı() {
             style={styles.reportIcon}
             onPress={() => setFeedbackVisible(true)}
           >
-            <Text style={{ fontSize: 12, color: '#94a3b8' }}>⚠️ Hata Bildir</Text>
+            <Text style={{ fontSize: 12, color: '#475569', fontWeight: '600' }}>⚠️ Hata Bildir</Text>
           </TouchableOpacity>
         </View>
 
@@ -332,9 +346,17 @@ export default function YarışmaEkranı() {
             <TouchableOpacity onPress={handleReveal} hitSlop={10}>
               <Text style={styles.subtleAction}>Yanıtı Göster</Text>
             </TouchableOpacity>
-            <Text style={{ color: '#cbd5e1', fontSize: 13 }}>|</Text>
+            <Text style={{ color: '#94a3b8', fontSize: 13 }}>|</Text>
             <TouchableOpacity onPress={handleSkip} hitSlop={10}>
               <Text style={styles.subtleAction}>Soruyu Atla</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {selectedAnswer && (
+          <View style={{ flexDirection: 'row', justifyContent: 'center', marginTop: 6, marginBottom: 8 }}>
+            <TouchableOpacity onPress={handleShareQuestion} hitSlop={10}>
+              <Text style={styles.subtleAction}>📤 Soruyu Paylaş</Text>
             </TouchableOpacity>
           </View>
         )}
@@ -514,5 +536,5 @@ const styles = StyleSheet.create({
   feedbackInput: { backgroundColor: '#f1f5f9', borderRadius: 15, padding: 15, height: 100, textAlignVertical: 'top', marginBottom: 20 },
   modalButtons: { flexDirection: 'row', justifyContent: 'flex-end', gap: 10 },
   modalButton: { padding: 12, paddingHorizontal: 20, borderRadius: 10 },
-  subtleAction: { fontSize: 13, color: '#94a3b8', fontWeight: '500' },
+  subtleAction: { fontSize: 13, color: '#475569', fontWeight: '600' },
 });
