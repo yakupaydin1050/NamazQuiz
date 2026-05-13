@@ -19,6 +19,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 // FIREBASE BAĞLANTILARI
 import { addDoc, collection, doc, getDocs, query, runTransaction, serverTimestamp, where } from 'firebase/firestore';
+import * as Haptics from 'expo-haptics';
+import * as StoreReview from 'expo-store-review';
 import { auth, db } from '../config/firebase';
 import QuestionText from '../components/ui/QuestionText';
 import { theme } from '../components/ui/theme';
@@ -101,6 +103,7 @@ export default function YarışmaEkranı() {
 
     const user = auth.currentUser;
     const pointsToSave = earlyQuit ? Math.floor(score / 2) : score;
+    let newCompletedCount = 0;
 
     if (user) {
       try {
@@ -112,6 +115,7 @@ export default function YarışmaEkranı() {
 
           const prevTotalScore = typeof data.totalScore === "number" ? data.totalScore : 0;
           const prevCompleted = typeof data.completedQuizzes === "number" ? data.completedQuizzes : 0;
+          newCompletedCount = earlyQuit ? prevCompleted : prevCompleted + 1;
 
           tx.set(
             userRef,
@@ -120,13 +124,18 @@ export default function YarışmaEkranı() {
               email: user.email || "misafir@quiz.com",
               displayName: user.displayName || data.displayName || "İsimsiz Oyuncu",
               totalScore: prevTotalScore + pointsToSave,
-              completedQuizzes: earlyQuit ? prevCompleted : prevCompleted + 1,
+              completedQuizzes: newCompletedCount,
               lastPlayed: serverTimestamp(),
               lastQuiz: { score: pointsToSave, seconds, level },
             },
             { merge: true }
           );
         });
+
+        if (!earlyQuit && newCompletedCount === 3) {
+          const available = await StoreReview.isAvailableAsync();
+          if (available) StoreReview.requestReview();
+        }
       } catch (error: any) {
         console.error("Firestore Kayıt Hatası:", error.message);
       }
@@ -210,8 +219,10 @@ export default function YarışmaEkranı() {
         setBonusLabel(`+${bonus} ⚡`);
         setTimeout(() => setBonusLabel(""), 1500);
       }
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     } else {
       setScore(prev => Math.max(0, prev - loss));
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     }
   };
 
