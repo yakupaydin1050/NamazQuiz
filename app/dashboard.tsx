@@ -11,11 +11,9 @@ import { auth, db } from '../config/firebase';
 import { getRankProgress } from '../utils/rank';
 import hadiths from '../data/hadiths.json';
 
-const today = new Date();
-const dayIndex = Math.floor(today.getTime() / 86_400_000);
-const dailyHadith = hadiths[dayIndex % hadiths.length];
-
 export default function Dashboard() {
+  const today = new Date();
+  const dailyHadith = hadiths[Math.floor(today.getTime() / 86_400_000) % hadiths.length];
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [userData, setUserData] = useState({ totalScore: 0, completedQuizzes: 0, displayName: auth.currentUser?.displayName || 'Oyuncu' });
