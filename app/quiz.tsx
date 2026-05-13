@@ -19,6 +19,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 // FIREBASE BAĞLANTILARI
 import { addDoc, collection, doc, getDocs, query, runTransaction, serverTimestamp, where } from 'firebase/firestore';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Haptics from 'expo-haptics';
 import * as StoreReview from 'expo-store-review';
 import { auth, db } from '../config/firebase';
@@ -132,7 +133,16 @@ export default function YarışmaEkranı() {
           );
         });
 
-        if (!earlyQuit && newCompletedCount === 3) {
+        let shouldReview = !earlyQuit && newCompletedCount === 2;
+
+        if (earlyQuit) {
+          const raw = await AsyncStorage.getItem('earlyQuitCount');
+          const newCount = (parseInt(raw ?? '0') || 0) + 1;
+          await AsyncStorage.setItem('earlyQuitCount', String(newCount));
+          if (newCount === 2) shouldReview = true;
+        }
+
+        if (shouldReview) {
           const available = await StoreReview.isAvailableAsync();
           if (available) StoreReview.requestReview();
         }
