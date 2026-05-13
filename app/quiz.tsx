@@ -57,6 +57,7 @@ export default function YarışmaEkranı() {
   const [skippedQuestions, setSkippedQuestions] = useState<Set<number>>(new Set());
   const [showQuitModal, setShowQuitModal] = useState(false);
   const [wasEarlyQuit, setWasEarlyQuit] = useState(false);
+  const [maxReachedIndex, setMaxReachedIndex] = useState(0);
   const questionStartTime = useRef(Date.now());
 
   // Firestore'dan soruları çek
@@ -216,6 +217,7 @@ export default function YarışmaEkranı() {
       return;
     }
     setSkippedQuestions(prev => new Set([...prev, currentIndex]));
+    setMaxReachedIndex(prev => Math.max(prev, currentIndex + 1));
     if (currentIndex === questions.length - 1) {
       handleFinishQuiz();
     } else {
@@ -374,27 +376,27 @@ export default function YarışmaEkranı() {
           })}
         </View>
 
-        {!selectedAnswer && (
+        {!selectedAnswer && currentIndex >= maxReachedIndex && (
           <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 28, marginTop: 6, marginBottom: 8 }}>
             {(() => {
-              const canReveal = revealedAnswers.has(currentIndex) || revealedAnswers.size < REVEAL_LIMIT;
+              const canReveal = revealedAnswers.size < REVEAL_LIMIT;
               const revealRemaining = REVEAL_LIMIT - revealedAnswers.size;
               return (
                 <TouchableOpacity onPress={handleReveal} hitSlop={10} disabled={!canReveal}>
                   <Text style={[styles.subtleAction, !canReveal && { color: theme.colors.border }]}>
-                    Yanıtı Göster ({revealRemaining})
+                    Yanıtı Göster{revealRemaining > 0 ? ` (${revealRemaining})` : ''}
                   </Text>
                 </TouchableOpacity>
               );
             })()}
             <Text style={{ color: '#94a3b8', fontSize: 13 }}>|</Text>
             {(() => {
-              const canSkip = skippedQuestions.has(currentIndex) || skippedQuestions.size < SKIP_LIMIT;
+              const canSkip = skippedQuestions.size < SKIP_LIMIT;
               const skipRemaining = SKIP_LIMIT - skippedQuestions.size;
               return (
                 <TouchableOpacity onPress={handleSkip} hitSlop={10} disabled={!canSkip}>
                   <Text style={[styles.subtleAction, !canSkip && { color: theme.colors.border }]}>
-                    Soruyu Atla ({skipRemaining})
+                    Soruyu Atla{skipRemaining > 0 ? ` (${skipRemaining})` : ''}
                   </Text>
                 </TouchableOpacity>
               );
@@ -443,6 +445,7 @@ export default function YarışmaEkranı() {
             if (currentIndex === questions.length - 1) {
               handleFinishQuiz();
             } else {
+              setMaxReachedIndex(prev => Math.max(prev, currentIndex + 1));
               setCurrentIndex(prev => prev + 1);
             }
           }}
