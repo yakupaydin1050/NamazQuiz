@@ -201,8 +201,14 @@ export default function YarışmaEkranı() {
     }
   };
 
+  const SKIP_LIMIT = 3;
+
   const handleSkip = () => {
     if (selectedAnswer || isFinished) return;
+    if (!skippedQuestions.has(currentIndex) && skippedQuestions.size >= SKIP_LIMIT) {
+      Alert.alert("Atla hakkın bitti", `En fazla ${SKIP_LIMIT} soruyu atlayabilirsin.`);
+      return;
+    }
     setSkippedQuestions(prev => new Set([...prev, currentIndex]));
     if (currentIndex === questions.length - 1) {
       handleFinishQuiz();
@@ -368,9 +374,17 @@ export default function YarışmaEkranı() {
               <Text style={styles.subtleAction}>Yanıtı Göster</Text>
             </TouchableOpacity>
             <Text style={{ color: '#94a3b8', fontSize: 13 }}>|</Text>
-            <TouchableOpacity onPress={handleSkip} hitSlop={10}>
-              <Text style={styles.subtleAction}>Soruyu Atla</Text>
-            </TouchableOpacity>
+            {(() => {
+              const canSkip = skippedQuestions.has(currentIndex) || skippedQuestions.size < SKIP_LIMIT;
+              const remaining = SKIP_LIMIT - skippedQuestions.size;
+              return (
+                <TouchableOpacity onPress={handleSkip} hitSlop={10} disabled={!canSkip}>
+                  <Text style={[styles.subtleAction, !canSkip && { color: theme.colors.border }]}>
+                    Soruyu Atla {canSkip && remaining < SKIP_LIMIT ? `(${remaining})` : ''}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })()}
           </View>
         )}
 
@@ -431,8 +445,8 @@ export default function YarışmaEkranı() {
       </View>
 
       <Modal visible={showQuitModal} transparent animationType="fade" onRequestClose={() => setShowQuitModal(false)}>
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.65)', padding: 24 }}>
-          <View style={{ width: '100%', backgroundColor: theme.colors.surface, borderRadius: 20, padding: theme.space.xl, gap: theme.space.md }}>
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.75)', padding: 24 }}>
+          <View style={{ width: '100%', backgroundColor: theme.colors.surface2, borderRadius: 20, padding: theme.space.xl, gap: theme.space.md, borderWidth: 1.5, borderColor: 'rgba(239,68,68,0.45)' }}>
             <Text style={{ fontSize: 20, fontWeight: '800', color: theme.colors.text, textAlign: 'center' }}>Erken Bitir</Text>
             <View style={{ gap: 10 }}>
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: theme.colors.surface2, borderRadius: 12, paddingHorizontal: 16, paddingVertical: 10 }}>
