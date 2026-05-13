@@ -182,8 +182,14 @@ export default function YarışmaEkranı() {
     return 0;
   };
 
+  const REVEAL_LIMIT = 3;
+
   const handleReveal = () => {
     if (selectedAnswer || isFinished) return;
+    if (!revealedAnswers.has(currentIndex) && revealedAnswers.size >= REVEAL_LIMIT) {
+      Alert.alert("Yanıt gösterme hakkın bitti", `En fazla ${REVEAL_LIMIT} sorunun yanıtını görebilirsin.`);
+      return;
+    }
     setRevealedAnswers(prev => new Set([...prev, currentIndex]));
     setUserAnswers(prev => ({ ...prev, [currentIndex]: currentQuestion.correct }));
   };
@@ -370,17 +376,25 @@ export default function YarışmaEkranı() {
 
         {!selectedAnswer && (
           <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 28, marginTop: 6, marginBottom: 8 }}>
-            <TouchableOpacity onPress={handleReveal} hitSlop={10}>
-              <Text style={styles.subtleAction}>Yanıtı Göster</Text>
-            </TouchableOpacity>
+            {(() => {
+              const canReveal = revealedAnswers.has(currentIndex) || revealedAnswers.size < REVEAL_LIMIT;
+              const revealRemaining = REVEAL_LIMIT - revealedAnswers.size;
+              return (
+                <TouchableOpacity onPress={handleReveal} hitSlop={10} disabled={!canReveal}>
+                  <Text style={[styles.subtleAction, !canReveal && { color: theme.colors.border }]}>
+                    Yanıtı Göster ({revealRemaining})
+                  </Text>
+                </TouchableOpacity>
+              );
+            })()}
             <Text style={{ color: '#94a3b8', fontSize: 13 }}>|</Text>
             {(() => {
               const canSkip = skippedQuestions.has(currentIndex) || skippedQuestions.size < SKIP_LIMIT;
-              const remaining = SKIP_LIMIT - skippedQuestions.size;
+              const skipRemaining = SKIP_LIMIT - skippedQuestions.size;
               return (
                 <TouchableOpacity onPress={handleSkip} hitSlop={10} disabled={!canSkip}>
                   <Text style={[styles.subtleAction, !canSkip && { color: theme.colors.border }]}>
-                    Soruyu Atla {canSkip && remaining < SKIP_LIMIT ? `(${remaining})` : ''}
+                    Soruyu Atla ({skipRemaining})
                   </Text>
                 </TouchableOpacity>
               );
