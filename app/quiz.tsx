@@ -447,7 +447,7 @@ export default function YarışmaEkranı() {
       <Modal visible={showQuitModal} transparent animationType="fade" onRequestClose={() => setShowQuitModal(false)}>
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.75)', padding: 24 }}>
           <View style={{ width: '100%', backgroundColor: theme.colors.surface2, borderRadius: 20, padding: theme.space.xl, gap: theme.space.md, borderWidth: 1.5, borderColor: 'rgba(239,68,68,0.45)' }}>
-            <Text style={{ fontSize: 20, fontWeight: '800', color: theme.colors.text, textAlign: 'center' }}>Erken Bitir</Text>
+            <Text style={{ fontSize: 20, fontWeight: '800', color: theme.colors.text, textAlign: 'center' }}>Yarışmayı Bitir?</Text>
             <View style={{ gap: 10 }}>
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: theme.colors.surface2, borderRadius: 12, paddingHorizontal: 16, paddingVertical: 10 }}>
                 <Text style={{ fontSize: 13, color: theme.colors.muted }}>Şu anki puanın</Text>
