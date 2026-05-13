@@ -7,7 +7,6 @@ import {
   KeyboardAvoidingView,
   Modal,
   Platform,
-  SafeAreaView,
   ScrollView,
   Share,
   StyleSheet,
@@ -16,11 +15,13 @@ import {
   TouchableOpacity,
   View
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 // FIREBASE BAĞLANTILARI
 import { addDoc, collection, doc, getDocs, query, runTransaction, serverTimestamp, where } from 'firebase/firestore';
 import { auth, db } from '../config/firebase';
 import QuestionText from '../components/ui/QuestionText';
+import { theme } from '../components/ui/theme';
 
 function shuffleArray(array: any[]) {
   const shuffled = [...array];
@@ -51,6 +52,7 @@ export default function YarışmaEkranı() {
   const [bonusLabel, setBonusLabel] = useState("");
   const [revealedAnswers, setRevealedAnswers] = useState<Set<number>>(new Set());
   const [skippedQuestions, setSkippedQuestions] = useState<Set<number>>(new Set());
+  const [showQuitModal, setShowQuitModal] = useState(false);
   const questionStartTime = useRef(Date.now());
 
   // Firestore'dan soruları çek
@@ -320,10 +322,10 @@ export default function YarışmaEkranı() {
 
         <View style={styles.optionsContainer}>
           {currentQuestion.options.map((option: string, index: number) => {
-            let backgroundColor = 'white', borderColor = '#e2e8f0';
+            let backgroundColor: string = theme.colors.surface2, borderColor: string = theme.colors.border;
             if (selectedAnswer) {
-              if (option === currentQuestion.correct) { backgroundColor = '#dcfce7'; borderColor = '#22c55e'; }
-              else if (option === selectedAnswer) { backgroundColor = '#fee2e2'; borderColor = '#ef4444'; }
+              if (option === currentQuestion.correct) { backgroundColor = 'rgba(74,222,128,0.15)'; borderColor = theme.colors.primary; }
+              else if (option === selectedAnswer) { backgroundColor = 'rgba(251,113,133,0.15)'; borderColor = theme.colors.danger; }
             }
             return (
               <TouchableOpacity
@@ -376,12 +378,7 @@ export default function YarışmaEkranı() {
         <TouchableOpacity
           style={[styles.pillButton, styles.pillDanger]}
           activeOpacity={0.85}
-          onPress={() => {
-            Alert.alert("Çıkış", "Yarışmayı bitirmek istiyor musun?", [
-              { text: "Hayır", style: "cancel" },
-              { text: "Evet, Bitir", onPress: () => handleFinishQuiz() }
-            ]);
-          }}
+          onPress={() => setShowQuitModal(true)}
         >
           <Ionicons name="flag-outline" size={18} color="#ffffff" />
           <Text style={[styles.pillText, { color: "#ffffff" }]}>Bitir</Text>
@@ -413,6 +410,31 @@ export default function YarışmaEkranı() {
           />
         </TouchableOpacity>
       </View>
+
+      <Modal visible={showQuitModal} transparent animationType="fade" onRequestClose={() => setShowQuitModal(false)}>
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.65)', padding: 24 }}>
+          <View style={{ width: '100%', backgroundColor: theme.colors.surface, borderRadius: 20, padding: theme.space.xl, gap: theme.space.md }}>
+            <Text style={{ fontSize: 20, fontWeight: '800', color: theme.colors.text, textAlign: 'center' }}>Yarışmayı Bitir</Text>
+            <Text style={{ fontSize: 14, color: theme.colors.muted, textAlign: 'center', lineHeight: 20 }}>
+              Şu ana kadar kazandığın puanlar kaydedilecek. Devam etmek istiyor musun?
+            </Text>
+            <View style={{ flexDirection: 'row', gap: theme.space.sm, marginTop: theme.space.xs }}>
+              <TouchableOpacity
+                onPress={() => setShowQuitModal(false)}
+                style={{ flex: 1, padding: 14, borderRadius: 12, backgroundColor: theme.colors.surface2, alignItems: 'center', borderWidth: 1, borderColor: theme.colors.border }}
+              >
+                <Text style={{ fontSize: 15, fontWeight: '700', color: theme.colors.text }}>Devam Et</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => { setShowQuitModal(false); handleFinishQuiz(); }}
+                style={{ flex: 1, padding: 14, borderRadius: 12, backgroundColor: theme.colors.danger, alignItems: 'center' }}
+              >
+                <Text style={{ fontSize: 15, fontWeight: '800', color: '#fff' }}>Bitir</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
 
       <Modal visible={isFeedbackVisible} animationType="fade" transparent={true}>
         <View style={styles.modalOverlay}>
@@ -468,73 +490,41 @@ export default function YarışmaEkranı() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F8FAFC', padding: 20 },
-  header: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 20, backgroundColor: 'white', padding: 15, borderRadius: 20, elevation: 2 },
+  container: { flex: 1, backgroundColor: theme.colors.bg, padding: 20 },
+  header: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 20, backgroundColor: theme.colors.surface, padding: 15, borderRadius: 20, borderWidth: 1, borderColor: theme.colors.border },
   headerItem: { alignItems: 'center' },
-  headerLabel: { fontSize: 10, color: '#94a3b8', fontWeight: 'bold' },
-  headerValue: { fontSize: 18, fontWeight: 'bold', color: '#166534' },
-  questionCard: { backgroundColor: 'white', padding: 25, borderRadius: 25, marginBottom: 20, minHeight: 160, justifyContent: 'center', elevation: 3 },
-  questionText: { fontSize: 19, fontWeight: '700', textAlign: 'center', color: '#1e293b' },
+  headerLabel: { fontSize: 10, color: theme.colors.muted, fontWeight: 'bold', letterSpacing: 1 },
+  headerValue: { fontSize: 18, fontWeight: 'bold', color: theme.colors.primary },
+  questionCard: { backgroundColor: theme.colors.surface, padding: 25, borderRadius: 25, marginBottom: 20, minHeight: 160, justifyContent: 'center', borderWidth: 1, borderColor: theme.colors.border },
+  questionText: { fontSize: 19, fontWeight: '700', textAlign: 'center', color: theme.colors.text },
   reportIcon: { position: 'absolute', bottom: 10, right: 15 },
   optionsContainer: { width: '100%' },
   optionButton: { padding: 15, borderRadius: 18, marginBottom: 12, borderWidth: 1, flexDirection: 'row', alignItems: 'center' },
-  optionCircle: { width: 30, height: 30, backgroundColor: '#f1f5f9', borderRadius: 8, justifyContent: 'center', alignItems: 'center', marginRight: 15 },
-  optionLetter: { fontWeight: 'bold', color: '#64748b' },
-  optionText: { fontSize: 16, fontWeight: '500', flex: 1 },
-  bottomBar: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    gap: 10,
-    paddingTop: 12,
-  },
-  pillButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    height: 46,
-    paddingHorizontal: 14,
-    borderRadius: 999,
-    backgroundColor: "#ffffff",
-    borderWidth: 1,
-    borderColor: "#e2e8f0",
-    flex: 1,
-  },
-  pillPrimary: {
-    borderColor: "#86efac",
-  },
-  pillDanger: {
-    backgroundColor: "#ef4444",
-    borderColor: "#ef4444",
-    maxWidth: 120,
-  },
-  pillDisabled: {
-    backgroundColor: "#f8fafc",
-    borderColor: "#e2e8f0",
-  },
-  pillText: {
-    fontWeight: "800",
-    color: "#1e293b",
-  },
-  pillTextDisabled: {
-    color: "#cbd5e1",
-  },
-  resultContainer: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 30, backgroundColor: '#F8FAFC' },
+  optionCircle: { width: 30, height: 30, backgroundColor: theme.colors.bg, borderRadius: 8, justifyContent: 'center', alignItems: 'center', marginRight: 15 },
+  optionLetter: { fontWeight: 'bold', color: theme.colors.muted },
+  optionText: { fontSize: 16, fontWeight: '500', flex: 1, color: theme.colors.text },
+  bottomBar: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 10, paddingTop: 12 },
+  pillButton: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, height: 46, paddingHorizontal: 14, borderRadius: 999, backgroundColor: theme.colors.surface, borderWidth: 1, borderColor: theme.colors.border, flex: 1 },
+  pillPrimary: { borderColor: theme.colors.primary },
+  pillDanger: { backgroundColor: theme.colors.danger, borderColor: theme.colors.danger, maxWidth: 120 },
+  pillDisabled: { backgroundColor: theme.colors.bg, borderColor: theme.colors.border },
+  pillText: { fontWeight: "800", color: theme.colors.text },
+  pillTextDisabled: { color: theme.colors.muted },
+  resultContainer: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 30, backgroundColor: theme.colors.bg },
   resultEmoji: { fontSize: 80, marginBottom: 10 },
-  resultTitle: { fontSize: 28, fontWeight: 'bold', color: '#166534' },
-  resultSubtitle: { fontSize: 14, color: '#64748b', marginBottom: 30 },
+  resultTitle: { fontSize: 28, fontWeight: 'bold', color: theme.colors.primary },
+  resultSubtitle: { fontSize: 14, color: theme.colors.muted, marginBottom: 30 },
   statsGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', width: '100%', marginBottom: 30 },
-  statCard: { backgroundColor: 'white', width: '48%', padding: 15, borderRadius: 20, marginBottom: 15, alignItems: 'center', elevation: 2 },
-  statLabel: { fontSize: 9, color: '#94a3b8', fontWeight: 'bold', marginBottom: 5 },
-  statValue: { fontSize: 18, fontWeight: 'bold' },
-  mainButton: { backgroundColor: '#22c55e', width: '100%', padding: 18, borderRadius: 15, alignItems: 'center' },
-  mainButtonText: { color: 'white', fontSize: 16, fontWeight: 'bold' },
-  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', padding: 20 },
-  modalContent: { backgroundColor: 'white', borderRadius: 25, padding: 25 },
-  modalTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 15 },
-  feedbackInput: { backgroundColor: '#f1f5f9', borderRadius: 15, padding: 15, height: 100, textAlignVertical: 'top', marginBottom: 20 },
+  statCard: { backgroundColor: theme.colors.surface, width: '48%', padding: 15, borderRadius: 20, marginBottom: 15, alignItems: 'center', borderWidth: 1, borderColor: theme.colors.border },
+  statLabel: { fontSize: 9, color: theme.colors.muted, fontWeight: 'bold', marginBottom: 5 },
+  statValue: { fontSize: 18, fontWeight: 'bold', color: theme.colors.text },
+  mainButton: { backgroundColor: theme.colors.primary, width: '100%', padding: 18, borderRadius: 15, alignItems: 'center' },
+  mainButtonText: { color: '#000', fontSize: 16, fontWeight: 'bold' },
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.65)', justifyContent: 'center', padding: 20 },
+  modalContent: { backgroundColor: theme.colors.surface, borderRadius: 25, padding: 25 },
+  modalTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 15, color: theme.colors.text },
+  feedbackInput: { backgroundColor: theme.colors.surface2, borderRadius: 15, padding: 15, height: 100, textAlignVertical: 'top', marginBottom: 20, color: theme.colors.text },
   modalButtons: { flexDirection: 'row', justifyContent: 'flex-end', gap: 10 },
   modalButton: { padding: 12, paddingHorizontal: 20, borderRadius: 10 },
-  subtleAction: { fontSize: 13, color: '#475569', fontWeight: '600' },
+  subtleAction: { fontSize: 13, color: theme.colors.muted, fontWeight: '600' },
 });
