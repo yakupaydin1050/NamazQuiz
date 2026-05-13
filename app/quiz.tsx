@@ -244,7 +244,7 @@ export default function YarışmaEkranı() {
         <View style={styles.statsGrid}>
           <View style={styles.statCard}>
             <Text style={styles.statLabel}>KAZANILAN PUAN</Text>
-            <Text style={[styles.statValue, { color: '#166534' }]}>+{score}</Text>
+            <Text style={[styles.statValue, { color: '#166534' }]}>+{wasEarlyQuit ? Math.floor(score / 2) : score}</Text>
           </View>
           <View style={styles.statCard}>
             <Text style={styles.statLabel}>SÜRE</Text>
