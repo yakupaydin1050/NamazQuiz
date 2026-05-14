@@ -50,6 +50,7 @@ export default function ProfileSettings() {
   const provider = getProvider();
 
   const [photoURL, setPhotoURL] = useState(user?.photoURL ?? "");
+  const [pendingPhotoUri, setPendingPhotoUri] = useState<string | null>(null);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
 
   const [displayName, setDisplayName] = useState(user?.displayName ?? "");
@@ -85,7 +86,7 @@ export default function ProfileSettings() {
   const isPasswordUser = provider === "password";
   const isAnonymous = provider === "anonymous";
 
-  const handlePhotoUpdate = async (source: "camera" | "library") => {
+  const handlePickPhoto = async (source: "camera" | "library") => {
     if (source === "camera") {
       const { status } = await ImagePicker.requestCameraPermissionsAsync();
       if (status !== "granted") {
@@ -105,12 +106,21 @@ export default function ProfileSettings() {
       : await ImagePicker.launchImageLibraryAsync({ allowsEditing: true, aspect: [1, 1], quality: 0.6, mediaTypes: "images" });
 
     if (result.canceled) return;
+    setPendingPhotoUri(result.assets[0].uri);
+  };
 
+  const handleConfirmPhoto = async () => {
+    if (!pendingPhotoUri) return;
     setUploadingPhoto(true);
     try {
-      const uri = result.assets[0].uri;
-      const response = await fetch(uri);
-      const blob = await response.blob();
+      const blob = await new Promise<Blob>((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.onload = () => resolve(xhr.response as Blob);
+        xhr.onerror = (e) => reject(e);
+        xhr.responseType = 'blob';
+        xhr.open('GET', pendingPhotoUri, true);
+        xhr.send(null);
+      });
 
       const storageRef = ref(storage, `profilePhotos/${user.uid}.jpg`);
       await uploadBytes(storageRef, blob);
@@ -120,6 +130,7 @@ export default function ProfileSettings() {
       await setDoc(doc(db, "users", user.uid), { photoURL: downloadURL }, { merge: true });
 
       setPhotoURL(downloadURL);
+      setPendingPhotoUri(null);
       Alert.alert("Tamam", "Profil fotoğrafı güncellendi.");
     } catch (e) {
       console.error(e);
@@ -139,8 +150,8 @@ export default function ProfileSettings() {
       return;
     }
     Alert.alert("Profil Fotoğrafı", "Nasıl eklemek istersin?", [
-      { text: "Kamera", onPress: () => handlePhotoUpdate("camera") },
-      { text: "Galeriden Seç", onPress: () => handlePhotoUpdate("library") },
+      { text: "Kamera", onPress: () => handlePickPhoto("camera") },
+      { text: "Galeriden Seç", onPress: () => handlePickPhoto("library") },
       { text: "İptal", style: "cancel" },
     ]);
   };
@@ -305,10 +316,18 @@ export default function ProfileSettings() {
       <ScrollView contentContainerStyle={{ padding: theme.space.xl, gap: theme.space.lg }} keyboardShouldPersistTaps="handled">
 
         <View style={{ alignItems: "center", marginBottom: theme.space.sm }}>
-          <TouchableOpacity onPress={showPhotoOptions} disabled={uploadingPhoto} activeOpacity={0.8}>
-            <View style={{ width: 96, height: 96, borderRadius: 48, backgroundColor: theme.colors.surface, borderWidth: 2, borderColor: theme.colors.border, overflow: "hidden", alignItems: "center", justifyContent: "center" }}>
+          <TouchableOpacity onPress={showPhotoOptions} disabled={uploadingPhoto || !!pendingPhotoUri} activeOpacity={0.8}>
+            <View style={{
+              width: 96, height: 96, borderRadius: 48,
+              backgroundColor: theme.colors.surface,
+              borderWidth: 2,
+              borderColor: pendingPhotoUri ? theme.colors.primary : theme.colors.border,
+              overflow: "hidden", alignItems: "center", justifyContent: "center"
+            }}>
               {uploadingPhoto ? (
                 <ActivityIndicator color={theme.colors.primary} />
+              ) : pendingPhotoUri ? (
+                <Image source={{ uri: pendingPhotoUri }} style={{ width: 96, height: 96 }} />
               ) : photoURL ? (
                 <Image source={{ uri: photoURL }} style={{ width: 96, height: 96 }} />
               ) : (
@@ -317,13 +336,37 @@ export default function ProfileSettings() {
                 </Text>
               )}
             </View>
-            <View style={{ position: "absolute", bottom: 0, right: 0, width: 28, height: 28, borderRadius: 14, backgroundColor: theme.colors.primary, alignItems: "center", justifyContent: "center", borderWidth: 2, borderColor: theme.colors.bg }}>
-              <Ionicons name="camera" size={14} color="#fff" />
-            </View>
+            {!pendingPhotoUri && (
+              <View style={{ position: "absolute", bottom: 0, right: 0, width: 28, height: 28, borderRadius: 14, backgroundColor: theme.colors.primary, alignItems: "center", justifyContent: "center", borderWidth: 2, borderColor: theme.colors.bg }}>
+                <Ionicons name="camera" size={14} color="#fff" />
+              </View>
+            )}
           </TouchableOpacity>
-          <Text style={{ ...theme.type.small, color: theme.colors.muted, marginTop: 10 }}>
-            Fotoğrafı değiştirmek için dokun
-          </Text>
+
+          {pendingPhotoUri ? (
+            <View style={{ flexDirection: 'row', gap: 10, marginTop: 12 }}>
+              <TouchableOpacity
+                onPress={() => setPendingPhotoUri(null)}
+                disabled={uploadingPhoto}
+                style={{ paddingHorizontal: 20, paddingVertical: 8, borderRadius: 999, backgroundColor: theme.colors.surface2, borderWidth: 1, borderColor: theme.colors.border }}
+              >
+                <Text style={{ ...theme.type.small, color: theme.colors.muted, fontWeight: '700' }}>İptal</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={handleConfirmPhoto}
+                disabled={uploadingPhoto}
+                style={{ paddingHorizontal: 20, paddingVertical: 8, borderRadius: 999, backgroundColor: theme.colors.primary, opacity: uploadingPhoto ? 0.6 : 1 }}
+              >
+                <Text style={{ ...theme.type.small, color: '#000', fontWeight: '800' }}>
+                  {uploadingPhoto ? 'Yükleniyor...' : 'Kaydet'}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <Text style={{ ...theme.type.small, color: theme.colors.muted, marginTop: 10 }}>
+              Fotoğrafı değiştirmek için dokun
+            </Text>
+          )}
         </View>
 
         <Card>

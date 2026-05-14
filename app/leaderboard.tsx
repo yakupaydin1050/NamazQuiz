@@ -93,9 +93,10 @@ export default function LiderlikTablosu() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Stack.Screen options={{ 
+      <Stack.Screen options={{
         headerTitle: "Liderlik Tablosu",
         headerShown: true,
+        headerTitleAlign: "center",
         headerStyle: { backgroundColor: '#F8FAFC' },
         headerTintColor: '#166534',
         headerLeft: () => (

@@ -18,7 +18,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 // FIREBASE BAĞLANTILARI
-import { addDoc, collection, doc, getDocs, query, runTransaction, serverTimestamp, where } from 'firebase/firestore';
+import { addDoc, arrayRemove, arrayUnion, collection, doc, getDoc, getDocs, query, runTransaction, serverTimestamp, updateDoc, where } from 'firebase/firestore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Haptics from 'expo-haptics';
 import * as StoreReview from 'expo-store-review';
@@ -58,7 +58,19 @@ export default function YarışmaEkranı() {
   const [showQuitModal, setShowQuitModal] = useState(false);
   const [wasEarlyQuit, setWasEarlyQuit] = useState(false);
   const [maxReachedIndex, setMaxReachedIndex] = useState(0);
+  const [favoriteIds, setFavoriteIds] = useState<Set<string>>(new Set());
+  const [togglingFavorite, setTogglingFavorite] = useState(false);
   const questionStartTime = useRef(Date.now());
+
+  // Kullanıcının favori sorularını yükle
+  useEffect(() => {
+    const user = auth.currentUser;
+    if (!user) return;
+    getDoc(doc(db, "users", user.uid)).then(snap => {
+      const ids: string[] = snap.exists() ? (snap.data().favoriteQuestionIds ?? []) : [];
+      setFavoriteIds(new Set(ids));
+    });
+  }, []);
 
   // Firestore'dan soruları çek
   useEffect(() => {
@@ -66,7 +78,10 @@ export default function YarışmaEkranı() {
       try {
         const q = query(collection(db, "questions"), where("level", "==", level));
         const snapshot = await getDocs(q);
-        const fetched = snapshot.docs.map(d => d.data());
+        const fetched = snapshot.docs.map(d => {
+          const data = d.data();
+          return { ...data, id: d.id, options: shuffleArray(data.options ?? []) };
+        });
         setQuestions(shuffleArray(fetched).slice(0, 20));
       } catch (err) {
         console.error("Sorular yüklenemedi:", err);
@@ -222,6 +237,27 @@ export default function YarışmaEkranı() {
       handleFinishQuiz();
     } else {
       setCurrentIndex(prev => prev + 1);
+    }
+  };
+
+  const handleToggleFavorite = async (questionId: string) => {
+    const user = auth.currentUser;
+    if (!user || !questionId) return;
+    setTogglingFavorite(true);
+    try {
+      const isFav = favoriteIds.has(questionId);
+      await updateDoc(doc(db, "users", user.uid), {
+        favoriteQuestionIds: isFav ? arrayRemove(questionId) : arrayUnion(questionId),
+      });
+      setFavoriteIds(prev => {
+        const next = new Set(prev);
+        if (isFav) next.delete(questionId); else next.add(questionId);
+        return next;
+      });
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setTogglingFavorite(false);
     }
   };
 
@@ -405,9 +441,15 @@ export default function YarışmaEkranı() {
         )}
 
         {selectedAnswer && (
-          <View style={{ flexDirection: 'row', justifyContent: 'center', marginTop: 6, marginBottom: 8 }}>
+          <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 28, marginTop: 6, marginBottom: 8 }}>
             <TouchableOpacity onPress={handleShareQuestion} hitSlop={10}>
               <Text style={styles.subtleAction}>📤 Soruyu Paylaş</Text>
+            </TouchableOpacity>
+            <Text style={{ color: '#94a3b8', fontSize: 13 }}>|</Text>
+            <TouchableOpacity onPress={() => handleToggleFavorite(currentQuestion.id)} hitSlop={10} disabled={togglingFavorite}>
+              <Text style={styles.subtleAction}>
+                {favoriteIds.has(currentQuestion.id) ? '★ Favorilerden Çıkar' : '☆ Favorilere Ekle'}
+              </Text>
             </TouchableOpacity>
           </View>
         )}

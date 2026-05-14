@@ -36,7 +36,7 @@ service cloud.firestore {
       return data.keys().hasOnly([
         'uid', 'email', 'displayName', 'totalScore',
         'completedQuizzes', 'lastPlayed', 'lastQuiz',
-        'photoURL', 'createdAt'
+        'photoURL', 'createdAt', 'favoriteQuestionIds'
       ])
       && (data.totalScore is int || data.totalScore is float)
       && data.totalScore >= 0

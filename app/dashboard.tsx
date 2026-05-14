@@ -159,13 +159,11 @@ export default function Dashboard() {
 
         <View style={{ gap: theme.space.md }}>
           <Button text="Yarışmaya Başla" onPress={() => router.push({ pathname: '/categories', params: { userName: userData.displayName } })} />
+          <Button text="Favori Sorularım" onPress={() => router.push('/favorites')} variant="secondary" />
           <Button text="Liderlik Tablosu" onPress={() => router.push('/leaderboard')} variant="secondary" />
           <Button text="Profil & Güvenlik" onPress={() => router.push('/profile')} variant="secondary" />
-          <Button text="Arkadaşına Tavsiye Et" onPress={handleShare} variant="ghost" />
-        </View>
-
-        <View style={{ marginTop: theme.space.xl }}>
           <Button text="Çıkış Yap" onPress={handleLogout} variant="danger" />
+          <Button text="Arkadaşına Tavsiye Et" onPress={handleShare} variant="ghost" />
         </View>
 
       </ScrollView>
