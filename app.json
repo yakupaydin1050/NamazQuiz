@@ -13,7 +13,7 @@
     },
     "android": {
       "package": "com.yaay.namazquiz",
-      "versionCode": 3,
+      "versionCode": 4,
       "adaptiveIcon": {
         "backgroundColor": "#161616",
         "foregroundImage": "./assets/images/android-icon-foreground.png"
