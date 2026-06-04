@@ -65,7 +65,7 @@ export default function Dashboard() {
   return (
     <Screen withPadding={false} contentStyle={{ paddingTop: theme.space.lg }}>
       <Stack.Screen options={{ headerShown: false }} />
-      <ScrollView contentContainerStyle={{ padding: theme.space.xl }} keyboardShouldPersistTaps="handled">
+      <ScrollView contentContainerStyle={{ padding: theme.space.xl, paddingBottom: theme.space.xl * 2 }} keyboardShouldPersistTaps="handled">
         
         <View style={{ marginBottom: theme.space.lg }}>
           <Text style={{ ...theme.type.micro, color: theme.colors.muted, letterSpacing: 1.2 }}>

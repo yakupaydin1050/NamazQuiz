@@ -138,12 +138,12 @@ export default function Favorites() {
                   )}
                 </TouchableOpacity>
               </View>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                <View style={{ backgroundColor: 'rgba(34,197,94,0.12)', borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3 }}>
+              <View style={{ gap: 6 }}>
+                <View style={{ backgroundColor: 'rgba(34,197,94,0.12)', borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3, alignSelf: 'flex-start' }}>
                   <Text style={{ fontSize: 12, fontWeight: '700', color: theme.colors.primary }}>✅ {item.correct}</Text>
                 </View>
-                <View style={{ backgroundColor: 'rgba(100,116,139,0.12)', borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3 }}>
-                  <Text style={{ fontSize: 12, fontWeight: '700', color: levelColor(item.level) }}>
+                <View style={{ backgroundColor: 'rgba(100,116,139,0.12)', borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3, alignSelf: 'flex-start' }}>
+                  <Text style={{ fontSize: 12, fontWeight: '700', color: levelColor(item.level), includeFontPadding: false }}>
                     {levelLabel(item.level)}
                   </Text>
                 </View>

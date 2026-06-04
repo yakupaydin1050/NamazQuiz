@@ -18,7 +18,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 // FIREBASE BAĞLANTILARI
-import { addDoc, arrayRemove, arrayUnion, collection, doc, getDoc, getDocs, query, runTransaction, serverTimestamp, updateDoc, where } from 'firebase/firestore';
+import { addDoc, arrayRemove, arrayUnion, collection, doc, getDoc, getDocs, query, runTransaction, serverTimestamp, setDoc, updateDoc, where } from 'firebase/firestore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Haptics from 'expo-haptics';
 import * as StoreReview from 'expo-store-review';
@@ -60,6 +60,7 @@ export default function YarışmaEkranı() {
   const [maxReachedIndex, setMaxReachedIndex] = useState(0);
   const [favoriteIds, setFavoriteIds] = useState<Set<string>>(new Set());
   const [togglingFavorite, setTogglingFavorite] = useState(false);
+  const [reportedIds, setReportedIds] = useState<Set<string>>(new Set());
   const questionStartTime = useRef(Date.now());
 
   // Kullanıcının favori sorularını yükle
@@ -246,9 +247,9 @@ export default function YarışmaEkranı() {
     setTogglingFavorite(true);
     try {
       const isFav = favoriteIds.has(questionId);
-      await updateDoc(doc(db, "users", user.uid), {
+      await setDoc(doc(db, "users", user.uid), {
         favoriteQuestionIds: isFav ? arrayRemove(questionId) : arrayUnion(questionId),
-      });
+      }, { merge: true });
       setFavoriteIds(prev => {
         const next = new Set(prev);
         if (isFav) next.delete(questionId); else next.add(questionId);
@@ -380,12 +381,21 @@ export default function YarışmaEkranı() {
         keyboardShouldPersistTaps="handled"
       >
         <View style={styles.questionCard}>
-          <QuestionText text={currentQuestion.question} style={styles.questionText} />
+          <View style={{ alignItems: 'center', justifyContent: 'center', minHeight: 100 }}>
+            <QuestionText text={currentQuestion.question} style={styles.questionText} />
+          </View>
           <TouchableOpacity
-            style={styles.reportIcon}
-            onPress={() => setFeedbackVisible(true)}
+            style={{ alignSelf: 'flex-end', marginTop: 10 }}
+            hitSlop={10}
+            onPress={() => {
+              if (reportedIds.has(currentQuestion.id)) {
+                Alert.alert("Zaten Bildirildi", "Bu soru için zaten bir hata bildirimi yaptınız.");
+                return;
+              }
+              setFeedbackVisible(true);
+            }}
           >
-            <Text style={{ fontSize: 12, color: '#475569', fontWeight: '600' }}>⚠️ Hata Bildir</Text>
+            <Text style={{ fontSize: 12, color: theme.colors.muted, fontWeight: '600' }}>⚠️ Hata Bildir</Text>
           </TouchableOpacity>
         </View>
 
@@ -549,13 +559,17 @@ export default function YarışmaEkranı() {
             <TextInput
               style={styles.feedbackInput}
               placeholder="Sorun nedir?"
+              placeholderTextColor={theme.colors.muted}
               multiline
               value={feedbackComment}
               onChangeText={setFeedbackComment}
             />
             <View style={styles.modalButtons}>
-              <TouchableOpacity style={styles.modalButton} onPress={() => setFeedbackVisible(false)}>
-                <Text>İptal</Text>
+              <TouchableOpacity
+                style={[styles.modalButton, { backgroundColor: theme.colors.surface2, borderWidth: 1, borderColor: theme.colors.border }]}
+                onPress={() => setFeedbackVisible(false)}
+              >
+                <Text style={{ color: theme.colors.text, fontWeight: '700' }}>İptal</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.modalButton, { backgroundColor: '#22c55e', opacity: sendingFeedback ? 0.6 : 1 }]}
@@ -575,6 +589,7 @@ export default function YarışmaEkranı() {
                       userId: auth.currentUser?.uid ?? "anonim",
                       createdAt: serverTimestamp(),
                     });
+                    setReportedIds(prev => new Set([...prev, currentQuestion.id]));
                     setFeedbackVisible(false);
                     setFeedbackComment("");
                     Alert.alert("Teşekkürler!", "Bildirim gönderildi.");
@@ -601,7 +616,7 @@ const styles = StyleSheet.create({
   headerItem: { alignItems: 'center' },
   headerLabel: { fontSize: 10, color: theme.colors.muted, fontWeight: 'bold', letterSpacing: 1 },
   headerValue: { fontSize: 18, fontWeight: 'bold', color: theme.colors.primary },
-  questionCard: { backgroundColor: theme.colors.surface, padding: 25, borderRadius: 25, marginBottom: 20, minHeight: 160, justifyContent: 'center', borderWidth: 1, borderColor: theme.colors.border },
+  questionCard: { backgroundColor: theme.colors.surface, padding: 25, borderRadius: 25, marginBottom: 20, minHeight: 160, borderWidth: 1, borderColor: theme.colors.border },
   questionText: { fontSize: 19, fontWeight: '700', textAlign: 'center', color: theme.colors.text },
   reportIcon: { position: 'absolute', bottom: 10, right: 15 },
   optionsContainer: { width: '100%' },
